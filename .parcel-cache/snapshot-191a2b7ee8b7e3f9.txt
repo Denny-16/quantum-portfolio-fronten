@@ -1,4 +1,4 @@
-5108
+5111
 58C:\Users\User\Desktop\quantum-portfolio-fronten\.gitignore134004420625705199 0
 88C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\tar\dist\esm\mkdir.d.ts.map134004381170346891 0
 81C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\react-redux\dist\cjs134004383251539834 1
@@ -8,7 +8,6 @@
 90C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\regenerator-runtime\README.md134004380926306602 0
 99C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\react-router\dist\production\lib\types134004383255223927 1
 106C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\reselect\src\autotrackMemoize\autotracking.ts134004383251539834 0
-70C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\is-number134004380925821964 1
 97C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\react-redux\src\hooks\useDispatch.ts134004383252435099 0
 93C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\tar\dist\esm\get-write-flag.d.ts134004381171982960 0
 65C:\Users\User\Desktop\quantum-portfolio-fronten\package-lock.json134004383258547547 0
@@ -19,7 +18,7 @@
 78C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@msgpackr-extract134004383257858109 1
 87C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\react-redux\src\components134004383252676441 1
 95C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\tar\dist\commonjs\symlink-error.js134004381169602851 0
-52C:\Users\User\Desktop\quantum-portfolio-fronten\dist134004428480274034 1
+52C:\Users\User\Desktop\quantum-portfolio-fronten\dist134004456832043509 1
 92C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\workers\src\cpuCount.js134004380928235921 0
 86C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\tar\dist\esm\parse.js.map134004381170746862 0
 86C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\ordered-binary\index.d.ts134004380927935933 0
@@ -57,7 +56,7 @@
 88C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\reporter-tracer\lib134004380925013298 1
 81C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\tapable\lib\index.js134004381167565192 0
 80C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\mkdirp\package.json134004381168463346 0
-56C:\Users\User\Desktop\quantum-portfolio-fronten\index.js134004421533569476 0
+56C:\Users\User\Desktop\quantum-portfolio-fronten\index.js134004452783896191 0
 90C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@swc\helpers\esm\_defaults.js134004380933842207 0
 92C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\caniuse-lite\data\regions\BS.js134004380932195511 0
 68C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\globals134004380926629159 1
@@ -77,7 +76,7 @@
 67C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@lezer134004380919498952 1
 106C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@reduxjs\toolkit\src\entities\entity_state.ts134004383255991042 0
 103C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\workers\lib\core-worker.browser.js134004380927691097 0
-51C:\Users\User\Desktop\quantum-portfolio-fronten\src134004411320523428 1
+51C:\Users\User\Desktop\quantum-portfolio-fronten\src134004448678095025 1
 92C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\caniuse-lite\data\regions\RW.js134004380946110099 0
 100C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\magic-string\dist\magic-string.es.d.mts134004381168480692 0
 106C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\transformer-svg\src\SVGTransformer.js134004380925741865 0
@@ -99,6 +98,12 @@
 81C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\ordered-binary\tests134004380926629159 1
 95C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@swc\helpers\src\_create_class.mjs134004380940639224 0
 58C:\Users\User\Desktop\quantum-portfolio-fronten\src\App.js134004426110588365 0
+79C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\globals\index.d.ts134004380926710750 0
+110C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\transformer-babel\src\BabelTransformer.js134004380926985135 0
+84C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\postcss\lib\fromJSON.js134004381167205830 0
+85C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@swc\helpers\esm\_set.js134004380934662675 0
+113C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\lmdb\dependencies\lmdb\libraries\liblmdb\mtest_enc.c134004380931440480 0
+66C:\Users\User\Desktop\quantum-portfolio-fronten\src\store\store.js134004451348183663 0
 58C:\Users\User\Desktop\quantum-portfolio-fronten\src\assets134004411157481436 1
 87C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\tar\dist\commonjs\pax.d.ts134004381172660475 0
 94C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\tar\dist\esm\normalize-unicode.js134004381168697180 0
@@ -124,6 +129,22 @@
 57C:\Users\User\Desktop\quantum-portfolio-fronten\src\pages134004410817905423 1
 97C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\reselect\dist\reselect.legacy-esm.js134004383250638733 0
 102C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\caniuse-lite\data\features\css-regions.js134004380936624378 0
+110C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@jridgewell\gen-mapping\types\set-array.d.cts.map134004381167987352 0
+96C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\tailwindcss\dist\chunk-G32FJCSR.mjs134004381169521009 0
+84C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\core\index.d.ts134004380937116266 0
+101C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\tar\dist\commonjs\path-reservations.d.ts134004381172660475 0
+83C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@swc\core\Visitor.d.ts134004380929004982 0
+106C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\msgpackr-extract\node_modules\detect-libc\lib134004380926063315 1
+91C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\set-cookie-parser\package.json134004383250612371 0
+102C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@swc\helpers\src\_non_iterable_spread.mjs134004380941307418 0
+88C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@jridgewell\remapping\types134004381168908275 1
+66C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@lmdb134004383257858109 1
+57C:\Users\User\Desktop\quantum-portfolio-fronten\src\store134004456173344295 1
+105C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@reduxjs\toolkit\src\entities\tests\fixtures134004383255061470 1
+86C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\utils\src\svgo.js134004380931672209 0
+108C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@jridgewell\remapping\types\remapping.d.mts.map134004381167953438 0
+71C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\redux\dist134004383251819614 1
+68C:\Users\User\Desktop\quantum-portfolio-fronten\src\store\uiSlice.js134004451101981648 0
 113C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\core\test\fixtures\library-custom-scopehoist134004380936460853 1
 84C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\watcher\scripts134004380930067977 1
 106C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\watcher\src\windows\WindowsBackend.hh134004380930004501 0
@@ -140,13 +161,8 @@
 82C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\tailwindcss\theme.css134004381168364078 0
 99C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@reduxjs\toolkit\src\entities\index.ts134004383256335490 0
 72C:\Users\User\Desktop\quantum-portfolio-fronten\src\components\Navbar.js134004428479083567 0
-73C:\Users\User\Desktop\quantum-portfolio-fronten\src\components\Sidebar.js134004425070652713 0
+73C:\Users\User\Desktop\quantum-portfolio-fronten\src\components\Sidebar.js134004454339104662 0
 112C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\caniuse-lite\data\features\native-filesystem-api.js134004380944562941 0
-65C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\jiti134004381169639528 1
-103C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\transformer-babel\lib\constants.js134004380927505951 0
-94C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\weak-lru-cache\tests\benchmark.js134004380925255186 0
-113C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@swc\helpers\_\_class_private_field_set\package.json134004380937033726 0
-100C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\tar\dist\commonjs\make-command.d.ts.map134004381170346891 0
 90C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\yallist\dist\esm\index.js.map134004381167373986 0
 91C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\minipass\dist\esm\index.js.map134004381167700816 0
 86C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\tar\dist\esm\package.json134004381169934473 0
@@ -164,9 +180,6 @@
 69C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\get-port134004380926228148 1
 100C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\caniuse-lite\data\features\indexeddb.js134004380941766274 0
 68C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@isaacs134004381165096413 1
-103C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\tailwindcss\dist\flatten-color-palette.mjs134004381169639528 0
-77C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\semver\functions134004380930481911 1
-68C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\is-glob134004380925821964 1
 67C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@types134004383249404221 1
 88C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@swc\helpers\_\_export_star134004380937764693 1
 91C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\core\lib\assetUtils.js134004380929739597 0
@@ -175,16 +188,6 @@
 113C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\react-router\dist\development\lib\types\internal.mjs134004383253997758 0
 72C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@jridgewell134004381165096413 1
 87C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\reselect\src\lruMemoize.ts134004383251864075 0
-110C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@jridgewell\gen-mapping\types\set-array.d.cts.map134004381167987352 0
-96C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\tailwindcss\dist\chunk-G32FJCSR.mjs134004381169521009 0
-84C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\core\index.d.ts134004380937116266 0
-101C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\tar\dist\commonjs\path-reservations.d.ts134004381172660475 0
-83C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@swc\core\Visitor.d.ts134004380929004982 0
-106C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\msgpackr-extract\node_modules\detect-libc\lib134004380926063315 1
-91C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\set-cookie-parser\package.json134004383250612371 0
-102C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@swc\helpers\src\_non_iterable_spread.mjs134004380941307418 0
-88C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@jridgewell\remapping\types134004381168908275 1
-66C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@lmdb134004383257858109 1
 91C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\semver\functions\prerelease.js134004380929703706 0
 66C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\immer134004383251621237 1
 104C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\core\test\fixtures\config\subfolder134004380927691097 1
@@ -281,6 +284,15 @@
 105C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\lmdb\dependencies\v8\v8-fast-api-calls-v16.h134004380933527314 0
 69C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\escalade134004380927369632 1
 105C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\caniuse-lite\data\features\css-cross-fade.js134004380934415945 0
+103C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\tailwindcss\dist\flatten-color-palette.mjs134004381169639528 0
+77C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\semver\functions134004380930481911 1
+68C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\is-glob134004380925821964 1
+70C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\is-number134004380925821964 1
+65C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\jiti134004381169639528 1
+103C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\transformer-babel\lib\constants.js134004380927505951 0
+94C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\weak-lru-cache\tests\benchmark.js134004380925255186 0
+113C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@swc\helpers\_\_class_private_field_set\package.json134004380937033726 0
+100C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\tar\dist\commonjs\make-command.d.ts.map134004381170346891 0
 95C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\core\lib\Transformation.js134004380935075110 0
 78C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\get-port\index.js134004380925578317 0
 94C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\minipass\dist\commonjs\index.d.ts134004381168036712 0
@@ -792,14 +804,14 @@
 109C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\caniuse-lite\data\features\css-math-functions.js134004380935822950 0
 116C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\react-redux\dist\cjs\react-redux.production.min.cjs.map134004383251621237 0
 75C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\type-fest\ts41134004380929824083 1
-106C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\core\lib\public\MutableBundleGraph.js134004380932776116 0
-91C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\type-fest\ts41\camel-case.d.ts134004380927203086 0
-87C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\postcss\lib\processor.d.ts134004381169639528 0
 92C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\semver\ranges\min-satisfying.js134004380929182943 0
 98C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@swc\helpers\_\_decorate\package.json134004380937523478 0
 92C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\caniuse-lite\data\regions\PR.js134004380945625979 0
 114C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@tailwindcss\oxide\node_modules\detect-libc\README.md134004381167059050 0
 89C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\redux\src\applyMiddleware.ts134004383251456413 0
+87C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\postcss\lib\processor.d.ts134004381169639528 0
+106C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\core\lib\public\MutableBundleGraph.js134004380932776116 0
+91C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\type-fest\ts41\camel-case.d.ts134004380927203086 0
 86C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\react\compiler-runtime.js134004383250638733 0
 82C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\postcss\lib\parser.js134004381168036712 0
 90C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\postcss\lib\no-work-result.js134004381167619035 0
@@ -1176,7 +1188,7 @@
 87C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\tar\dist\esm\read-entry.js134004381169386043 0
 82C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\json5\lib\register.js134004380927041350 0
 84C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\react-dom\server.bun.js134004383254538801 0
-83C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\lmdb\dependencies\lmdb134004380925983071 1
+83C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\lmdb\dependencies\lmdb134004380926063315 1
 106C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\tar\dist\commonjs\normalize-windows-path.d.ts134004381172150289 0
 105C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@swc\helpers\_\_super_prop_base\package.json134004380939375634 0
 80C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@swc\types\index.js134004380925741865 0
@@ -1207,7 +1219,7 @@
 114C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\caniuse-lite\data\features\kerning-pairs-ligatures.js134004380942776648 0
 108C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\core\test\fixtures\plugins\node_modules134004380932195511 1
 121C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\react-router\dist\production\index-react-server-client.d.mts134004383254485989 0
-93C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\lmdb\dependencies\lmdb\libraries134004380926063315 1
+93C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\lmdb\dependencies\lmdb\libraries134004380926143403 1
 91C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\runtime-service-worker134004380926063315 1
 101C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@swc\helpers\_\_class_private_field_init134004380936788607 1
 84C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\tar\dist\esm\types.d.ts134004381172814662 0
@@ -1364,7 +1376,7 @@
 114C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@swc\helpers\_\_class_private_field_init\package.json134004380936788607 0
 88C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\tar\dist\commonjs\pack.d.ts134004381172567225 0
 130C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\react-router\dist\development\index-react-server-client-BKpa2trA.d.ts134004383254882073 0
-101C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\lmdb\dependencies\lmdb-data-v1\libraries134004380924444185 1
+101C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\lmdb\dependencies\lmdb-data-v1\libraries134004380924601882 1
 113C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@reduxjs\toolkit\src\query\tests\matchers.test-d.tsx134004383257608400 0
 120C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\react-router\dist\production\index-react-server-client.d.ts134004383254980490 0
 92C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\caniuse-lite\data\regions\BT.js134004380932195511 0
@@ -1641,8 +1653,6 @@
 82C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\reselect\package.json134004383250724864 0
 98C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\lightningcss\node_modules\detect-libc134004380926874459 1
 88C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\semver\internal\lrucache.js134004380928751321 0
-114C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\runtime-js\lib\helpers\browser\html-loader.js134004380927935933 0
-92C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\caniuse-lite\data\regions\PF.js134004380945297458 0
 95C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\node-addon-api\tools\check-napi.js134004380928016356 0
 112C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\react-router\dist\production\context-jKip1TFB.d.mts134004383254173483 0
 108C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\react-router\dist\development\chunk-ZO66TDGB.js134004383252126825 0
@@ -1791,9 +1801,6 @@
 87C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\utils\lib\index.js134004380930562697 0
 107C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\lmdb\dependencies\lmdb\libraries\liblmdb\mdb.c134004380931219364 0
 97C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\redux-thunk\dist\cjs\redux-thunk.cjs134004383250462583 0
-86C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\utils\src\svgo.js134004380931672209 0
-108C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@jridgewell\remapping\types\remapping.d.mts.map134004381167953438 0
-71C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\redux\dist134004383251819614 1
 119C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\react\cjs\react-jsx-dev-runtime.react-server.production.js134004383251374137 0
 79C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\redux\package.json134004383250638733 0
 101C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@swc\helpers\src\_is_native_function.mjs134004380941046366 0
@@ -1889,8 +1896,8 @@
 111C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\react-router\dist\production\index-react-server.js134004383252839066 0
 110C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\react-dom\cjs\react-dom-server.bun.development.js134004383253585478 0
 112C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\react-router\dist\production\index-react-server.mjs134004383253997758 0
-88C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\postcss\lib\previous-map.js134004381168283909 0
 98C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\react-router\dist\production\index.js134004383253004604 0
+88C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\postcss\lib\previous-map.js134004381168283909 0
 99C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\caniuse-lite\dist\unpacker\features.js134004380939660329 0
 95C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\reporter-cli\src\render.js134004380927935933 0
 99C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\react-router\dist\production\index.mjs134004383253997758 0
@@ -2103,10 +2110,6 @@
 86C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\postcss\lib\document.d.ts134004381169188673 0
 92C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\caniuse-lite\data\regions\AZ.js134004380930663835 0
 84C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\postcss\lib\document.js134004381167112599 0
-79C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\globals\index.d.ts134004380926710750 0
-110C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\transformer-babel\src\BabelTransformer.js134004380926985135 0
-84C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\postcss\lib\fromJSON.js134004381167205830 0
-85C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@swc\helpers\esm\_set.js134004380934662675 0
 133C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@reduxjs\toolkit\src\listenerMiddleware\tests\listenerMiddleware.test.ts134004383256589822 0
 81C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\postcss\lib\input.js134004381167267332 0
 92C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\caniuse-lite\data\regions\EE.js134004380939190195 0
@@ -2300,7 +2303,7 @@
 90C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\workers\lib\Worker.js134004380930481911 0
 94C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\node-addon-api\node_addon_api.gyp134004380924828462 0
 111C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\caniuse-lite\data\features\high-resolution-time.js134004380941128023 0
-63C:\Users\User\Desktop\quantum-portfolio-fronten\dist\index.html134004426112486576 0
+63C:\Users\User\Desktop\quantum-portfolio-fronten\dist\index.html134004456831242543 0
 89C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\node-addon-api\noexcept.gypi134004380926467757 0
 97C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\node-addon-api\tools\clang-format.js134004380928097179 0
 104C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\caniuse-lite\data\features\css-when-else.js134004380937523478 0
@@ -2650,7 +2653,7 @@
 95C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\lmdb\dependencies\lz4\lib\xxhash.h134004380933675776 0
 79C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\lmdb\dict\dict.txt134004380934579704 0
 97C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\watcher\src\watchman\BSER.cc134004380926547829 0
-91C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\lmdb\dependencies\lmdb-data-v1134004380924203430 1
+91C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\lmdb\dependencies\lmdb-data-v1134004380924444185 1
 114C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@reduxjs\toolkit\dist\redux-toolkit.legacy-esm.js.map134004383252758213 0
 82C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\lmdb\dependencies\lz4134004380928016356 1
 92C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\caniuse-lite\data\regions\MN.js134004380944315071 0
@@ -2669,7 +2672,7 @@
 120C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\lmdb\dependencies\lz4\lib\dll\example\fullbench-dll.vcxproj134004380934764739 0
 107C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\lmdb\dependencies\lz4\lib\dll\example\Makefile134004380928458666 0
 117C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\lmdb\dependencies\lmdb-data-v1\libraries\liblmdb\CHANGES134004380925013298 0
-93C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\workers\test\integration134004380927369632 1
+93C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\workers\test\integration134004380927446308 1
 76C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\chownr\dist\esm134004381167619035 1
 119C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\lmdb\dependencies\lmdb-data-v1\libraries\liblmdb\COPYRIGHT134004380925578317 0
 103C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\immer\dist\cjs\immer.cjs.production.js.map134004383251291833 0
@@ -2741,7 +2744,6 @@
 84C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\reporter-tracer134004380926063315 1
 101C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\enhanced-resolve\lib\AliasFieldPlugin.js134004381166782055 0
 110C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\lmdb\dependencies\lmdb\libraries\liblmdb\mtest4.c134004380931953599 0
-113C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\lmdb\dependencies\lmdb\libraries\liblmdb\mtest_enc.c134004380931440480 0
 92C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\caniuse-lite\data\regions\MR.js134004380944397257 0
 87C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\graph\src\Graph.js134004380928197323 0
 113C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@reduxjs\toolkit\src\tests\autoBatchEnhancer.test.ts134004383254899472 0
@@ -3126,6 +3128,8 @@
 92C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\caniuse-lite\data\regions\NR.js134004380944889633 0
 85C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@swc\helpers\_\_to_array134004380939494966 1
 92C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\caniuse-lite\data\regions\PA.js134004380945133814 0
+114C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\runtime-js\lib\helpers\browser\html-loader.js134004380927935933 0
+92C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\caniuse-lite\data\regions\PF.js134004380945297458 0
 92C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\caniuse-lite\data\regions\PG.js134004380945365042 0
 92C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\caniuse-lite\data\regions\PH.js134004380945382445 0
 92C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\caniuse-lite\data\regions\PK.js134004380945464023 0
@@ -3463,7 +3467,7 @@
 94C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\workers\src\WorkerFarm.js134004380930562697 0
 96C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\caniuse-lite\data\features\http2.js134004380941370554 0
 96C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\caniuse-lite\data\features\http3.js134004380941370554 0
-124C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\core\test\fixtures\local-plugin-config-pkg\node_modules134004380932646211 1
+124C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\core\test\fixtures\local-plugin-config-pkg\node_modules134004380932672226 1
 105C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\caniuse-lite\data\features\iframe-sandbox.js134004380941449117 0
 106C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\caniuse-lite\data\features\iframe-seamless.js134004380941449117 0
 104C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\caniuse-lite\data\features\iframe-srcdoc.js134004380941530472 0
@@ -3960,7 +3964,6 @@
 106C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@swc\helpers\src\_interop_require_default.mjs134004380941046366 0
 110C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@swc\helpers\src\_is_native_reflect_construct.mjs134004380941110644 0
 112C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@swc\helpers\src\_iterable_to_array_limit_loose.mjs134004380941128023 0
-82C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\rust\index.js134004380926467757 0
 98C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@swc\helpers\src\_new_arrow_check.mjs134004380941246312 0
 100C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@swc\helpers\src\_non_iterable_rest.mjs134004380941246312 0
 104C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@reduxjs\toolkit\src\tests\matchers.test.ts134004383256674879 0
@@ -4084,8 +4087,8 @@
 109C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@swc\helpers\cjs\_class_private_field_update.cjs134004380929329181 0
 107C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@swc\helpers\cjs\_class_private_method_get.cjs134004380929409678 0
 108C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@swc\helpers\cjs\_class_private_method_init.cjs134004380929491603 0
-93C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\utils\src\escape-html.js134004380928643957 0
 77C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\rust\lib134004380926896858 1
+93C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\utils\src\escape-html.js134004380928643957 0
 118C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@swc\helpers\cjs\_class_static_private_field_spec_set.cjs134004380929703706 0
 116C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@swc\helpers\cjs\_class_static_private_field_update.cjs134004380929739597 0
 95C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@swc\helpers\cjs\_create_class.cjs134004380929904115 0
@@ -4248,7 +4251,6 @@
 99C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@reduxjs\toolkit\src\entities\utils.ts134004383257275919 0
 110C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@jridgewell\gen-mapping\types\set-array.d.mts.map134004381168036712 0
 126C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@reduxjs\toolkit\src\entities\tests\entity_slice_enhancer.test.ts134004383255956553 0
-105C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@reduxjs\toolkit\src\entities\tests\fixtures134004383255061470 1
 118C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@reduxjs\toolkit\src\entities\tests\state_adapter.test.ts134004383256947329 0
 127C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@reduxjs\toolkit\src\entities\tests\unsorted_state_adapter.test.ts134004383257109836 0
 110C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@reduxjs\toolkit\src\entities\tests\utils.spec.ts134004383257192001 0
@@ -4469,6 +4471,7 @@
 106C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\source-map\dist\wasm-bindings.js.flow134004380926710750 0
 92C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\source-map\dist\wasm.js134004380928590048 0
 84C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\rust\index.d.ts134004380927369632 0
+82C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\rust\index.js134004380926467757 0
 87C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\rust\index.js.flow134004380925013298 0
 86C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\rust\package.json134004380927121480 0
 95C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\packager-wasm\package.json134004380926896858 0
@@ -4743,7 +4746,7 @@
 79C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\events\src134004380927691097 1
 101C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@jridgewell\remapping\dist\remapping.mjs134004381168697180 0
 99C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\events\test\Disposable.test.js134004380926228148 0
-90C:\Users\User\Desktop\quantum-portfolio-fronten\dist\quantum-portfolio-fronten.e02fbd41.js134004428480153861 0
+90C:\Users\User\Desktop\quantum-portfolio-fronten\dist\quantum-portfolio-fronten.e02fbd41.js134004456831955751 0
 101C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\events\test\ValueEmitter.test.js134004380927778526 0
 93C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\events\src\Disposable.js134004380925821964 0
 88C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\@parcel\events\src\index.js134004380927121480 0
@@ -5104,6 +5107,6 @@
 76C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\.bin\semver.cmd134004380948647557 0
 76C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\.bin\semver.ps1134004380948647557 0
 92C:\Users\User\Desktop\quantum-portfolio-fronten\node_modules\.bin\update-browserslist-db.cmd134004380948647557 0
-91C:\Users\User\Desktop\quantum-portfolio-fronten\dist\quantum-portfolio-fronten.aa436662.css134004428479821034 0
-95C:\Users\User\Desktop\quantum-portfolio-fronten\dist\quantum-portfolio-fronten.aa436662.css.map134004428479821034 0
-94C:\Users\User\Desktop\quantum-portfolio-fronten\dist\quantum-portfolio-fronten.e02fbd41.js.map134004428480267903 0
+91C:\Users\User\Desktop\quantum-portfolio-fronten\dist\quantum-portfolio-fronten.aa436662.css134004456831744798 0
+95C:\Users\User\Desktop\quantum-portfolio-fronten\dist\quantum-portfolio-fronten.aa436662.css.map134004456831752455 0
+94C:\Users\User\Desktop\quantum-portfolio-fronten\dist\quantum-portfolio-fronten.e02fbd41.js.map134004456832043509 0
