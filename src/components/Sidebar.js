@@ -6,7 +6,8 @@ export default function Sidebar() {
   const { dataset, risk, options } = useSelector((state) => state.ui);
 
   return (
-    <div className="w-64 bg-white shadow-lg p-4 rounded-2xl flex flex-col gap-6">
+    <div className="w-64 bg-gray-900 text-gray-100 shadow-lg p-4 rounded-2xl flex flex-col gap-6">
+
       {/* Dataset Selection */}
       <div>
         <h2 className="text-lg font-semibold mb-2">Dataset</h2>
