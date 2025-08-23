@@ -1,9 +1,11 @@
+// uiSlice.js
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   dataset: "", // "nifty50", "crypto", "nasdaq"
   risk: 5, // risk slider default
   options: [], // ["Sharpe Ratio", ...]
+  isSidebarOpen: false, // <-- add this
 };
 
 const uiSlice = createSlice({
@@ -24,9 +26,13 @@ const uiSlice = createSlice({
         state.options.push(option);
       }
     },
+    toggleSidebar: (state) => {
+      state.isSidebarOpen = !state.isSidebarOpen;
+    },
     resetUI: () => initialState,
   },
 });
 
-export const { setDataset, setRisk, toggleOption, resetUI } = uiSlice.actions;
+export const { setDataset, setRisk, toggleOption, resetUI, toggleSidebar } =
+  uiSlice.actions;
 export default uiSlice.reducer;
