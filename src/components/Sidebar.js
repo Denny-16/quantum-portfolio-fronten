@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   setDataset, setRisk, toggleOption, toggleSidebar,
   setInitialEquity, setTimeHorizon, setThreshold
-} from "../store/uiSlice"; // <- no .js here
+} from "../store/uiSlice"; // keep extensionless for Parcel stability
 
 const OPTIONS = ["Sharpe Ratio", "Stress Testing", "Classical Comparison"];
 
@@ -93,35 +93,41 @@ export default function Sidebar() {
                   step={1000}
                   className="w-full rounded-lg bg-[#0b0f1a] border border-zinc-700 px-3 py-2 text-sm"
                   value={initialEquity}
-                  onChange={(e) => dispatch(setInitialEquity(Number(e.target.value)))}
+                  onChange={(e) => dispatch(setInitialEquity(Math.max(0, Number(e.target.value) || 0)))}
+                  onBlur={(e) => { const v = Math.max(0, Number(e.target.value) || 0); e.target.value = String(v); }}
                 />
               </div>
 
-              {/* Time Horizon */}
+              {/* Time Horizon (days) */}
               <div className="space-y-1">
-                <label className="text-xs text-zinc-400">Time Horizon (periods)</label>
+                <label className="text-xs text-zinc-400">Time Horizon (days)</label>
                 <input
                   type="number"
                   min={1}
+                  max={365}
                   step={1}
                   className="w-full rounded-lg bg-[#0b0f1a] border border-zinc-700 px-3 py-2 text-sm"
                   value={timeHorizon}
-                  onChange={(e) => dispatch(setTimeHorizon(Number(e.target.value)))}
+                  onChange={(e) => dispatch(setTimeHorizon(Math.max(1, Math.min(365, Number(e.target.value) || 1))))}
+                  onBlur={(e) => { const v = Math.max(1, Math.min(365, Number(e.target.value) || 1)); e.target.value = String(v); }}
                 />
               </div>
 
-              {/* Threshold */}
+              {/* Threshold (%) */}
               <div className="space-y-1">
-                <label className="text-xs text-zinc-400">Threshold (optional)</label>
+                <label className="text-xs text-zinc-400">Threshold (%)</label>
                 <input
                   type="number"
-                  step={0.1}
+                  min={0}
+                  max={100}
+                  step={1}
                   className="w-full rounded-lg bg-[#0b0f1a] border border-zinc-700 px-3 py-2 text-sm"
                   value={threshold}
-                  onChange={(e) => dispatch(setThreshold(Number(e.target.value)))}
+                  onChange={(e) => dispatch(setThreshold(Math.max(0, Math.min(100, Number(e.target.value) || 0))))}
+                  onBlur={(e) => { const v = Math.max(0, Math.min(100, Number(e.target.value) || 0)); e.target.value = String(v); }}
                 />
                 <div className="text-[11px] text-zinc-500">
-                  Use to filter low-probability bitstrings or minimum weight (future use).
+                  Used to filter low-probability candidates (auto-applies).
                 </div>
               </div>
             </div>

@@ -76,18 +76,53 @@ export async function fetchAllocation({ topBits = "10101", hybrid = true, seed =
   ];
 }
 
-export async function backtestEvolution({ freq = "Monthly", hybrid = true, seed = 55 }) {
-  const rnd = mulberry32(seed + (freq === "Monthly" ? 0 : 100) + (hybrid ? 1 : 0));
-  await sleep(350);
-  const periods = ["T1", "T2", "T3", "T4", "T5", "T6"];
-  let q = 100000, c = 100000;
-  const series = periods.map((t) => {
-    q = Math.round(q * (1 + 0.015 + rnd() * 0.01));
-    c = Math.round(c * (1 + 0.011 + rnd() * 0.008));
-    return { time: t, Quantum: q, Classical: c };
-  });
-  return series;
+export async function backtestEvolution({
+  freq = "Monthly",
+  hybrid = true,
+  initialEquity = 100000,
+  timeHorizon = 30, // days
+} = {}) {
+  // deterministic seeds so it feels stable but reactive to inputs
+  const seedBase =
+    (freq === "Monthly" ? 13 : 29) +
+    (hybrid ? 7 : 3) +
+    Math.floor(initialEquity / 1000) +
+    Number(timeHorizon || 0);
+
+  let seedQ = seedBase + 17;
+  let seedC = seedBase + 5;
+
+  function randQ() { seedQ = (seedQ * 1103515245 + 12345) % 2147483647; return (seedQ / 2147483647) - 0.5; }
+  function randC() { seedC = (seedC * 1664525 + 1013904223) % 2147483647; return (seedC / 2147483647) - 0.5; }
+
+  const days = Math.max(2, Math.min(365, Number(timeHorizon) || 30)); // cap 365
+  const data = [];
+  let q = initialEquity;
+  let c = initialEquity;
+
+  // daily drift/vol; hybrid slightly improves risk-adjusted profile
+  const driftQ = (freq === "Monthly" ? 0.0005 : 0.00045) + (hybrid ? 0.00005 : 0);
+  const driftC = (freq === "Monthly" ? 0.00035 : 0.00033);
+  const volQ   = (freq === "Monthly" ? 0.008 : 0.0075) * (hybrid ? 0.9 : 1.0);
+  const volC   = (freq === "Monthly" ? 0.0065 : 0.006);
+
+  for (let d = 1; d <= days; d++) {
+    q = q * (1 + driftQ + volQ * randQ());
+    c = c * (1 + driftC + volC * randC());
+    if (q < initialEquity * 0.6) q = initialEquity * 0.6;
+    if (c < initialEquity * 0.6) c = initialEquity * 0.6;
+
+    data.push({
+      time: `Day ${d}`,
+      Quantum: Math.round(q),
+      Classical: Math.round(c),
+    });
+  }
+
+  await new Promise(r => setTimeout(r, 200));
+  return data;
 }
+
 
 export async function stressSim({ lastQuantum, lastClassical, stress, seed = 77 }) {
   const rnd = mulberry32(seed);

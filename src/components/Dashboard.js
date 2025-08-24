@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import Sidebar from "./Sidebar.js";
 import Navbar from "./Navbar.js";
 import { useDispatch, useSelector } from "react-redux";
-import { addToast } from "../store/uiSlice"; 
+import { addToast } from "../store/uiSlice";
 import EmptyState from "./EmptyState.js";
 import Skeleton from "./Skeleton.js";
 import { downloadJSON, downloadCSV } from "../utils/exporters.js";
@@ -87,10 +87,7 @@ export default function Dashboard() {
     frontier: false, sharpe: false, qaoa: false, alloc: false, evo: false, stress: false
   });
 
-  const constraints = useMemo(
-    () => ({ sectorCaps, turnoverCap, esgExclude }),
-    [sectorCaps, turnoverCap, esgExclude]
-  );
+  const constraints = useMemo(() => ({ sectorCaps, turnoverCap, esgExclude }), [sectorCaps, turnoverCap, esgExclude]);
 
   // ---------- Effects with error handling + toasts ----------
 
@@ -157,6 +154,29 @@ export default function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rebalanceFreq, useHybrid, initialEquity, timeHorizon]);
 
+  // Auto-apply QAOA + Allocation + Frontier when threshold changes
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoading((l) => ({ ...l, qaoa: true, alloc: true, frontier: true }));
+        const [bits, f] = await Promise.all([
+          runQAOASelection({ constraints, threshold }),
+          fetchEfficientFrontier({ risk, constraints, threshold }),
+        ]);
+        setTopBits(bits);
+        const newAlloc = await fetchAllocation({ topBits: bits[0]?.bits || "10101", hybrid: useHybrid, threshold });
+        setAlloc(newAlloc);
+        setFrontier(f);
+      } catch (e) {
+        console.error(e);
+        dispatch(addToast({ type: "error", msg: "Failed to apply threshold." }));
+      } finally {
+        setLoading((l) => ({ ...l, qaoa: false, alloc: false, frontier: false }));
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [threshold, useHybrid, constraints, risk]);
+
   // Recompute stress whenever controls or evolution changes
   useEffect(() => {
     (async () => {
@@ -175,7 +195,7 @@ export default function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stress, evolution]);
 
-  // Apply constraints
+    // Apply constraints manually (button)
   async function handleApplyConstraints() {
     try {
       setLoading((l) => ({ ...l, qaoa: true, alloc: true, frontier: true }));
@@ -195,6 +215,7 @@ export default function Dashboard() {
       setLoading((l) => ({ ...l, qaoa: false, alloc: false, frontier: false }));
     }
   }
+
 
   // ---------- Derived UI ----------
   const datasetLabel =
@@ -230,8 +251,8 @@ export default function Dashboard() {
                 {" • "}Rebalance: <span className="text-zinc-200">{rebalanceFreq}</span>
                 {" • "}Hybrid: <span className="text-zinc-200">{useHybrid ? "On" : "Off"}</span>
                 {" • "}Init: <span className="text-zinc-200">{`₹${initialEquity.toLocaleString("en-IN")}`}</span>
-                {" • "}Horizon: <span className="text-zinc-200">{timeHorizon}</span>
-                {" • "}Thresh: <span className="text-zinc-200">{threshold}</span>
+                {" • "}Horizon: <span className="text-zinc-200">{timeHorizon} days</span>
+                {" • "}Thresh: <span className="text-zinc-200">{threshold}%</span>
               </p>
             </div>
 
@@ -287,7 +308,7 @@ export default function Dashboard() {
                   </Card>
                   <Card title="Actions">
                     <button
-                      onClick={handleApplyConstraints}
+                      onClick={() => handleApplyConstraints()}
                       className="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-sm disabled:opacity-60"
                       disabled={loading.qaoa || loading.alloc || loading.frontier}
                     >
@@ -440,7 +461,7 @@ export default function Dashboard() {
                           </ResponsiveContainer>
                         )}
                       </div>
-                      <ChartCaption x="Time (rebalance periods)" y="Portfolio Value (₹)" />
+                      <ChartCaption x="Time (days)" y="Portfolio Value (₹)" />
                     </Card>
                   )}
                 </div>
@@ -476,7 +497,7 @@ export default function Dashboard() {
                       </ResponsiveContainer>
                     )}
                   </div>
-                  <ChartCaption x="Time (rebalance periods)" y="Portfolio Value (₹)" />
+                  <ChartCaption x="Time (days)" y="Portfolio Value (₹)" />
                 </Card>
               </div>
             )}
@@ -619,7 +640,7 @@ export default function Dashboard() {
                     </div>
 
                     <button
-                      onClick={handleApplyConstraints}
+                      onClick={() => handleApplyConstraints()}
                       className="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60"
                       disabled={loading.qaoa || loading.alloc || loading.frontier}
                     >
