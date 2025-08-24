@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import Sidebar from "./Sidebar.js";
 import Navbar from "./Navbar.js";
 import { useDispatch, useSelector } from "react-redux";
-import { addToast } from "../store/uiSlice";
+import { addToast } from "../store/uiSlice"; // extensionless is fine with Parcel
 import EmptyState from "./EmptyState.js";
 import Skeleton from "./Skeleton.js";
 import { downloadJSON, downloadCSV } from "../utils/exporters.js";
@@ -40,7 +40,7 @@ const ChartCaption = ({ x, y }) => (
   </div>
 );
 
-const COLORS = ["#7C3AED", "#3B82F6", "#10B981", "#F59E0B"];
+const COLORS = ["#7C3AED", "#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#22C55E", "#06B6D4"];
 const currency = (v) => `₹${Number(v).toLocaleString("en-IN")}`;
 const percent = (v, digits = 0) => `${Number(v).toFixed(digits)}%`;
 
@@ -59,9 +59,13 @@ const tooltipStyles = {
 export default function Dashboard() {
   const dispatch = useDispatch();
   const {
-    dataset, risk, options,
+    dataset, riskLevel, options,
     initialEquity, timeHorizon, threshold,
   } = useSelector((s) => s.ui);
+
+  // SAFE risk label to avoid undefined errors
+  const safeRiskLevel = (typeof riskLevel === "string" && riskLevel.length) ? riskLevel : "medium";
+  const riskPretty = safeRiskLevel.charAt(0).toUpperCase() + safeRiskLevel.slice(1);
 
   const [activeTab, setActiveTab] = useState("compare");
   const [activeSlice, setActiveSlice] = useState(null);
@@ -97,7 +101,7 @@ export default function Dashboard() {
       try {
         setLoading((l) => ({ ...l, frontier: true, sharpe: true, qaoa: true, alloc: true, evo: true }));
         const [f, s, bits] = await Promise.all([
-          fetchEfficientFrontier({ risk, constraints, threshold }),
+          fetchEfficientFrontier({ riskLevel: safeRiskLevel, constraints, threshold }),
           fetchSharpeComparison({}),
           runQAOASelection({ constraints, threshold }),
         ]);
@@ -105,7 +109,13 @@ export default function Dashboard() {
         setSharpeData(s);
         setTopBits(bits);
 
-        const allocData = await fetchAllocation({ topBits: bits[0]?.bits || "10101", hybrid: useHybrid, threshold });
+        // PASS dataset here
+        const allocData = await fetchAllocation({
+          topBits: bits[0]?.bits || "10101",
+          hybrid: useHybrid,
+          threshold,
+          dataset,
+        });
         setAlloc(allocData);
 
         const evo = await backtestEvolution({ freq: rebalanceFreq, hybrid: useHybrid, initialEquity, timeHorizon });
@@ -120,12 +130,12 @@ export default function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Update frontier when risk/threshold/constraints change
+  // Update frontier when riskLevel / threshold / constraints change
   useEffect(() => {
     (async () => {
       try {
         setLoading((l) => ({ ...l, frontier: true }));
-        const f = await fetchEfficientFrontier({ risk, constraints, threshold });
+        const f = await fetchEfficientFrontier({ riskLevel: safeRiskLevel, constraints, threshold });
         setFrontier(f);
       } catch (e) {
         console.error(e);
@@ -135,7 +145,7 @@ export default function Dashboard() {
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [risk, threshold, constraints]);
+  }, [safeRiskLevel, threshold, constraints]);
 
   // Re-run backtest when rebalancing / hybrid / equity / horizon changes
   useEffect(() => {
@@ -161,10 +171,16 @@ export default function Dashboard() {
         setLoading((l) => ({ ...l, qaoa: true, alloc: true, frontier: true }));
         const [bits, f] = await Promise.all([
           runQAOASelection({ constraints, threshold }),
-          fetchEfficientFrontier({ risk, constraints, threshold }),
+          fetchEfficientFrontier({ riskLevel: safeRiskLevel, constraints, threshold }),
         ]);
         setTopBits(bits);
-        const newAlloc = await fetchAllocation({ topBits: bits[0]?.bits || "10101", hybrid: useHybrid, threshold });
+        // PASS dataset here
+        const newAlloc = await fetchAllocation({
+          topBits: bits[0]?.bits || "10101",
+          hybrid: useHybrid,
+          threshold,
+          dataset,
+        });
         setAlloc(newAlloc);
         setFrontier(f);
       } catch (e) {
@@ -175,7 +191,7 @@ export default function Dashboard() {
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [threshold, useHybrid, constraints, risk]);
+  }, [threshold, useHybrid, constraints, safeRiskLevel]);
 
   // Recompute stress whenever controls or evolution changes
   useEffect(() => {
@@ -195,16 +211,22 @@ export default function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stress, evolution]);
 
-    // Apply constraints manually (button)
+  // Apply constraints manually (button)
   async function handleApplyConstraints() {
     try {
       setLoading((l) => ({ ...l, qaoa: true, alloc: true, frontier: true }));
       const [bits, f] = await Promise.all([
         runQAOASelection({ constraints, threshold }),
-        fetchEfficientFrontier({ risk, constraints, threshold }),
+        fetchEfficientFrontier({ riskLevel: safeRiskLevel, constraints, threshold }),
       ]);
       setTopBits(bits);
-      const newAlloc = await fetchAllocation({ topBits: bits[0]?.bits || "10101", hybrid: useHybrid, threshold });
+      // PASS dataset here
+      const newAlloc = await fetchAllocation({
+        topBits: bits[0]?.bits || "10101",
+        hybrid: useHybrid,
+        threshold,
+        dataset,
+      });
       setAlloc(newAlloc);
       setFrontier(f);
       dispatch(addToast({ type: "success", msg: "Constraints applied." }));
@@ -215,7 +237,6 @@ export default function Dashboard() {
       setLoading((l) => ({ ...l, qaoa: false, alloc: false, frontier: false }));
     }
   }
-
 
   // ---------- Derived UI ----------
   const datasetLabel =
@@ -247,7 +268,7 @@ export default function Dashboard() {
               </h1>
               <p className="text-zinc-400 text-sm">
                 Dataset: <span className="text-zinc-200">{datasetLabel}</span>
-                {" • "}Risk: <span className="text-zinc-200">{risk}</span>
+                {" • "}Risk: <span className="text-zinc-200">{riskPretty}</span>
                 {" • "}Rebalance: <span className="text-zinc-200">{rebalanceFreq}</span>
                 {" • "}Hybrid: <span className="text-zinc-200">{useHybrid ? "On" : "Off"}</span>
                 {" • "}Init: <span className="text-zinc-200">{`₹${initialEquity.toLocaleString("en-IN")}`}</span>
@@ -308,7 +329,7 @@ export default function Dashboard() {
                   </Card>
                   <Card title="Actions">
                     <button
-                      onClick={() => handleApplyConstraints()}
+                      onClick={handleApplyConstraints}
                       className="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-sm disabled:opacity-60"
                       disabled={loading.qaoa || loading.alloc || loading.frontier}
                     >
@@ -640,7 +661,7 @@ export default function Dashboard() {
                     </div>
 
                     <button
-                      onClick={() => handleApplyConstraints()}
+                      onClick={handleApplyConstraints}
                       className="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60"
                       disabled={loading.qaoa || loading.alloc || loading.frontier}
                     >
