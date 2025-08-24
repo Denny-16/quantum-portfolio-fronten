@@ -1,38 +1,39 @@
 import React from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toggleSidebar } from "../store/uiSlice";
 
-const Navbar = () => {
+export default function Navbar() {
   const dispatch = useDispatch();
+  const { dataset } = useSelector((s) => s.ui);
+
+  const label =
+    dataset === "nifty50" ? "NIFTY 50" :
+    dataset === "nasdaq" ? "NASDAQ" :
+    dataset === "crypto" ? "Crypto" :
+    "Select Dataset";
 
   return (
-    <div className="flex items-center justify-between bg-gray-900 text-white p-4 shadow-md">
-      {/* Left: Logo + Title */}
-      <div className="flex items-center gap-2">
-        {/* Sidebar toggle button (only visible on mobile) */}
-        <button
-          onClick={() => dispatch(toggleSidebar())}
-          className="md:hidden p-2 rounded-lg hover:bg-gray-700"
-        >
-          {/* Simple Menu icon (3 bars) */}
-          <div className="space-y-1">
-            <div className="w-6 h-0.5 bg-white"></div>
-            <div className="w-6 h-0.5 bg-white"></div>
-            <div className="w-6 h-0.5 bg-white"></div>
-          </div>
-        </button>
+    <header className="w-full bg-[#0f1422] border-b border-zinc-800/70">
+      <div className="h-14 px-4 md:px-6 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          {/* Hamburger for mobile */}
+          <button
+            className="lg:hidden p-2 rounded-lg bg-zinc-800/60"
+            onClick={() => dispatch(toggleSidebar())}
+            aria-label="Toggle sidebar"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="2" />
+            </svg>
+          </button>
+          <span className="text-sm text-zinc-400">Dataset:</span>
+          <span className="text-sm font-medium">{label}</span>
+        </div>
 
-        <h1 className="text-xl font-bold">Quantum Portfolio Optimizer</h1>
+        <div className="text-xs md:text-sm text-zinc-400">
+          Quantum Portfolio Optimizer — QAOA
+        </div>
       </div>
-
-      {/* Right: User / Settings */}
-      <div className="flex items-center gap-4">
-        <button className="px-4 py-2 border border-white rounded-lg hover:bg-white hover:text-gray-900 transition">
-          Login
-        </button>
-      </div>
-    </div>
+    </header>
   );
-};
-
-export default Navbar;
+}

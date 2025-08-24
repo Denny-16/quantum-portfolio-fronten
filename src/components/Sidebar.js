@@ -1,68 +1,101 @@
+import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setDataset, setRisk, toggleOption } from "../store/uiSlice";
+import { setDataset, setRisk, toggleOption, toggleSidebar } from "../store/uiSlice";
+
+const OPTIONS = ["Sharpe Ratio", "Stress Testing", "Classical Comparison"];
 
 export default function Sidebar() {
   const dispatch = useDispatch();
-  const { dataset, risk, options } = useSelector((state) => state.ui);
+  const { dataset, risk, options, isSidebarOpen } = useSelector((s) => s.ui);
+
+  const handleDataset = (e) => dispatch(setDataset(e.target.value));
+  const handleRisk = (e) => dispatch(setRisk(Number(e.target.value)));
+  const handleOption = (label) => () => dispatch(toggleOption(label));
 
   return (
-    <div className="w-64 bg-gray-900 text-gray-100 shadow-lg p-4 rounded-2xl flex flex-col gap-6">
+    <>
+      {/* Backdrop for mobile */}
+      <div
+        className={`fixed inset-0 bg-black/40 z-30 lg:hidden transition-opacity ${
+          isSidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => dispatch(toggleSidebar())}
+      />
 
-      {/* Dataset Selection */}
-      <div>
-        <h2 className="text-lg font-semibold mb-2">Dataset</h2>
-        <select
-          value={dataset}
-          onChange={(e) => dispatch(setDataset(e.target.value))}
-          className="w-full border rounded-xl p-2"
-        >
-          <option value="">Select Dataset</option>
-          <option value="nifty50">Nifty 50</option>
-          <option value="crypto">Crypto</option>
-          <option value="nasdaq">NASDAQ</option>
-        </select>
-      </div>
-
-      {/* Constraints */}
-      <div>
-        <h2 className="text-lg font-semibold mb-2">Constraints</h2>
-        <label className="text-sm">Risk Preference: {risk}</label>
-        <input
-          type="range"
-          min="0"
-          max="10"
-          value={risk}
-          onChange={(e) => dispatch(setRisk(Number(e.target.value)))}
-          className="w-full"
-        />
-      </div>
-
-      {/* Options */}
-      <div>
-        <h2 className="text-lg font-semibold mb-2">Options</h2>
-        <div className="flex flex-col gap-2">
-          {["Sharpe Ratio", "Stress Testing", "Classical Comparison"].map(
-            (label) => (
-              <label key={label} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={options.includes(label)}
-                  onChange={() => dispatch(toggleOption(label))}
-                />
-                {label}
-              </label>
-            )
-          )}
-        </div>
-      </div>
-
-      {/* Export Button */}
-      <button
-        onClick={() => console.log("Exporting results...")}
-        className="mt-auto w-full bg-blue-600 text-white py-2 px-4 rounded-xl hover:bg-blue-700 transition"
+      <aside
+        className={`z-40 w-[300px] shrink-0 bg-[#0f1422] border-r border-zinc-800/70
+        h-screen p-5 overflow-y-auto transition-transform fixed lg:static
+        ${isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
       >
-        Export Results
-      </button>
-    </div>
+        <div className="flex items-center justify-between mb-4 lg:hidden">
+          <h2 className="text-lg font-semibold">Filters</h2>
+          <button
+            className="px-3 py-1 rounded-lg bg-zinc-800/60"
+            onClick={() => dispatch(toggleSidebar())}
+          >
+            Close
+          </button>
+        </div>
+
+        <div className="space-y-6">
+          {/* Dataset */}
+          <section>
+            <label className="block text-sm text-zinc-400 mb-1">Select Dataset</label>
+            <select
+              value={dataset}
+              onChange={handleDataset}
+              className="w-full rounded-xl bg-[#0b0f1a] border border-zinc-800/70 px-3 py-2 outline-none"
+            >
+              <option value="">-- choose --</option>
+              <option value="nifty50">NIFTY 50</option>
+              <option value="nasdaq">NASDAQ</option>
+              <option value="crypto">Crypto</option>
+            </select>
+          </section>
+
+          {/* Constraints */}
+          <section>
+            <h3 className="text-sm font-medium text-zinc-300 mb-2">Constraints</h3>
+            <div className="mb-3">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-zinc-400">Risk Preference</span>
+                <span className="font-medium">{risk}</span>
+              </div>
+              <input
+                type="range"
+                min={1}
+                max={10}
+                step={1}
+                value={risk}
+                onChange={handleRisk}
+                className="w-full accent-indigo-500"
+              />
+            </div>
+          </section>
+
+          {/* Options */}
+          <section>
+            <h3 className="text-sm font-medium text-zinc-300 mb-2">Options</h3>
+            <div className="space-y-2">
+              {OPTIONS.map((label) => (
+                <label key={label} className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={options.includes(label)}
+                    onChange={handleOption(label)}
+                    className="accent-indigo-500"
+                  />
+                  <span>{label}</span>
+                </label>
+              ))}
+            </div>
+          </section>
+
+          <button className="w-full mt-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 transition">
+            Export Results
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }
