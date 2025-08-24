@@ -1,12 +1,18 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setDataset, setRisk, toggleOption, toggleSidebar } from "../store/uiSlice";
+import {
+  setDataset, setRisk, toggleOption, toggleSidebar,
+  setInitialEquity, setTimeHorizon, setThreshold
+} from "../store/uiSlice"; // <- no .js here
 
 const OPTIONS = ["Sharpe Ratio", "Stress Testing", "Classical Comparison"];
 
 export default function Sidebar() {
   const dispatch = useDispatch();
-  const { dataset, risk, options, isSidebarOpen } = useSelector((s) => s.ui);
+  const {
+    dataset, risk, options, isSidebarOpen,
+    initialEquity, timeHorizon, threshold
+  } = useSelector((s) => s.ui);
 
   const handleDataset = (e) => dispatch(setDataset(e.target.value));
   const handleRisk = (e) => dispatch(setRisk(Number(e.target.value)));
@@ -53,7 +59,7 @@ export default function Sidebar() {
             </select>
           </section>
 
-          {/* Constraints */}
+          {/* Risk */}
           <section>
             <h3 className="text-sm font-medium text-zinc-300 mb-2">Constraints</h3>
             <div className="mb-3">
@@ -70,6 +76,54 @@ export default function Sidebar() {
                 onChange={handleRisk}
                 className="w-full accent-indigo-500"
               />
+            </div>
+          </section>
+
+          {/* NEW Global Inputs */}
+          <section>
+            <h3 className="text-sm font-medium text-zinc-300 mb-2">Simulation Inputs</h3>
+
+            <div className="space-y-3">
+              {/* Initial Equity */}
+              <div className="space-y-1">
+                <label className="text-xs text-zinc-400">Initial Equity (₹)</label>
+                <input
+                  type="number"
+                  min={0}
+                  step={1000}
+                  className="w-full rounded-lg bg-[#0b0f1a] border border-zinc-700 px-3 py-2 text-sm"
+                  value={initialEquity}
+                  onChange={(e) => dispatch(setInitialEquity(Number(e.target.value)))}
+                />
+              </div>
+
+              {/* Time Horizon */}
+              <div className="space-y-1">
+                <label className="text-xs text-zinc-400">Time Horizon (periods)</label>
+                <input
+                  type="number"
+                  min={1}
+                  step={1}
+                  className="w-full rounded-lg bg-[#0b0f1a] border border-zinc-700 px-3 py-2 text-sm"
+                  value={timeHorizon}
+                  onChange={(e) => dispatch(setTimeHorizon(Number(e.target.value)))}
+                />
+              </div>
+
+              {/* Threshold */}
+              <div className="space-y-1">
+                <label className="text-xs text-zinc-400">Threshold (optional)</label>
+                <input
+                  type="number"
+                  step={0.1}
+                  className="w-full rounded-lg bg-[#0b0f1a] border border-zinc-700 px-3 py-2 text-sm"
+                  value={threshold}
+                  onChange={(e) => dispatch(setThreshold(Number(e.target.value)))}
+                />
+                <div className="text-[11px] text-zinc-500">
+                  Use to filter low-probability bitstrings or minimum weight (future use).
+                </div>
+              </div>
             </div>
           </section>
 

@@ -1,11 +1,13 @@
+// src/components/Dashboard.js
 import React, { useEffect, useMemo, useState } from "react";
 import Sidebar from "./Sidebar.js";
 import Navbar from "./Navbar.js";
 import { useDispatch, useSelector } from "react-redux";
-import { addToast } from "../store/uiSlice.js";
+import { addToast } from "../store/uiSlice"; 
 import EmptyState from "./EmptyState.js";
 import Skeleton from "./Skeleton.js";
 import { downloadJSON, downloadCSV } from "../utils/exporters.js";
+import InsightsPanel from "./InsightsPanel.js";
 
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -56,7 +58,10 @@ const tooltipStyles = {
 
 export default function Dashboard() {
   const dispatch = useDispatch();
-  const { dataset, risk, options } = useSelector((s) => s.ui);
+  const {
+    dataset, risk, options,
+    initialEquity, timeHorizon, threshold,
+  } = useSelector((s) => s.ui);
 
   const [activeTab, setActiveTab] = useState("compare");
   const [activeSlice, setActiveSlice] = useState(null);
@@ -82,7 +87,10 @@ export default function Dashboard() {
     frontier: false, sharpe: false, qaoa: false, alloc: false, evo: false, stress: false
   });
 
-  const constraints = useMemo(() => ({ sectorCaps, turnoverCap, esgExclude }), [sectorCaps, turnoverCap, esgExclude]);
+  const constraints = useMemo(
+    () => ({ sectorCaps, turnoverCap, esgExclude }),
+    [sectorCaps, turnoverCap, esgExclude]
+  );
 
   // ---------- Effects with error handling + toasts ----------
 
@@ -92,18 +100,18 @@ export default function Dashboard() {
       try {
         setLoading((l) => ({ ...l, frontier: true, sharpe: true, qaoa: true, alloc: true, evo: true }));
         const [f, s, bits] = await Promise.all([
-          fetchEfficientFrontier({ risk, constraints }),
+          fetchEfficientFrontier({ risk, constraints, threshold }),
           fetchSharpeComparison({}),
-          runQAOASelection({ constraints }),
+          runQAOASelection({ constraints, threshold }),
         ]);
         setFrontier(f);
         setSharpeData(s);
         setTopBits(bits);
 
-        const allocData = await fetchAllocation({ topBits: bits[0]?.bits || "10101", hybrid: useHybrid });
+        const allocData = await fetchAllocation({ topBits: bits[0]?.bits || "10101", hybrid: useHybrid, threshold });
         setAlloc(allocData);
 
-        const evo = await backtestEvolution({ freq: rebalanceFreq, hybrid: useHybrid });
+        const evo = await backtestEvolution({ freq: rebalanceFreq, hybrid: useHybrid, initialEquity, timeHorizon });
         setEvolution(evo);
       } catch (e) {
         console.error(e);
@@ -115,12 +123,12 @@ export default function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Update frontier when risk changes
+  // Update frontier when risk/threshold/constraints change
   useEffect(() => {
     (async () => {
       try {
         setLoading((l) => ({ ...l, frontier: true }));
-        const f = await fetchEfficientFrontier({ risk, constraints });
+        const f = await fetchEfficientFrontier({ risk, constraints, threshold });
         setFrontier(f);
       } catch (e) {
         console.error(e);
@@ -130,14 +138,14 @@ export default function Dashboard() {
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [risk]);
+  }, [risk, threshold, constraints]);
 
-  // Re-run backtest when rebalancing / hybrid changes
+  // Re-run backtest when rebalancing / hybrid / equity / horizon changes
   useEffect(() => {
     (async () => {
       try {
         setLoading((l) => ({ ...l, evo: true }));
-        const evo = await backtestEvolution({ freq: rebalanceFreq, hybrid: useHybrid });
+        const evo = await backtestEvolution({ freq: rebalanceFreq, hybrid: useHybrid, initialEquity, timeHorizon });
         setEvolution(evo);
       } catch (e) {
         console.error(e);
@@ -147,7 +155,7 @@ export default function Dashboard() {
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rebalanceFreq, useHybrid]);
+  }, [rebalanceFreq, useHybrid, initialEquity, timeHorizon]);
 
   // Recompute stress whenever controls or evolution changes
   useEffect(() => {
@@ -172,11 +180,11 @@ export default function Dashboard() {
     try {
       setLoading((l) => ({ ...l, qaoa: true, alloc: true, frontier: true }));
       const [bits, f] = await Promise.all([
-        runQAOASelection({ constraints }),
-        fetchEfficientFrontier({ risk, constraints }),
+        runQAOASelection({ constraints, threshold }),
+        fetchEfficientFrontier({ risk, constraints, threshold }),
       ]);
       setTopBits(bits);
-      const newAlloc = await fetchAllocation({ topBits: bits[0]?.bits || "10101", hybrid: useHybrid });
+      const newAlloc = await fetchAllocation({ topBits: bits[0]?.bits || "10101", hybrid: useHybrid, threshold });
       setAlloc(newAlloc);
       setFrontier(f);
       dispatch(addToast({ type: "success", msg: "Constraints applied." }));
@@ -217,7 +225,13 @@ export default function Dashboard() {
                 Quantum-Inspired Portfolio Optimization with QAOA
               </h1>
               <p className="text-zinc-400 text-sm">
-                Dataset: <span className="text-zinc-200">{datasetLabel}</span> • Risk: <span className="text-zinc-200">{risk}</span> • Rebalance: <span className="text-zinc-200">{rebalanceFreq}</span> • Hybrid: <span className="text-zinc-200">{useHybrid ? "On" : "Off"}</span>
+                Dataset: <span className="text-zinc-200">{datasetLabel}</span>
+                {" • "}Risk: <span className="text-zinc-200">{risk}</span>
+                {" • "}Rebalance: <span className="text-zinc-200">{rebalanceFreq}</span>
+                {" • "}Hybrid: <span className="text-zinc-200">{useHybrid ? "On" : "Off"}</span>
+                {" • "}Init: <span className="text-zinc-200">{`₹${initialEquity.toLocaleString("en-IN")}`}</span>
+                {" • "}Horizon: <span className="text-zinc-200">{timeHorizon}</span>
+                {" • "}Thresh: <span className="text-zinc-200">{threshold}</span>
               </p>
             </div>
 
@@ -469,11 +483,16 @@ export default function Dashboard() {
 
             {/* INSIGHTS TAB */}
             {activeTab === "insights" && (
-              <Card title="Quantum Insights (Demo)">
-                <p className="text-sm text-zinc-300">
-                  Hook this to real QAOA runs later; numbers here update when you apply constraints, rebalancing, or hybrid mode.
-                </p>
-              </Card>
+              <div className="grid grid-cols-1 gap-6">
+                <InsightsPanel
+                  loading={loading.frontier || loading.alloc || loading.evo}
+                  topBits={topBits}
+                  sharpeData={sharpeData}
+                  alloc={alloc}
+                  evolution={evolution}
+                  useHybrid={useHybrid}
+                />
+              </div>
             )}
 
             {/* STRESS TAB */}
