@@ -1,6 +1,6 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { toggleSidebar } from "../store/uiSlice";
+import { toggleSidebar, openAbout } from "../store/uiSlice";
 
 export default function Navbar() {
   const dispatch = useDispatch();
@@ -30,8 +30,17 @@ export default function Navbar() {
           <span className="text-sm font-medium">{label}</span>
         </div>
 
-        <div className="text-xs md:text-sm text-zinc-400">
-          Quantum Portfolio Optimizer — QAOA
+        <div className="flex items-center gap-2">
+          <span className="hidden sm:block text-xs md:text-sm text-zinc-400">
+            Quantum Portfolio Optimizer — QAOA
+          </span>
+          <button
+            onClick={() => dispatch(openAbout())}
+            className="text-xs md:text-sm px-3 py-2 rounded-xl border border-zinc-700/60 hover:bg-zinc-800/60 transition"
+            aria-label="Open About"
+          >
+            About
+          </button>
         </div>
       </div>
     </header>

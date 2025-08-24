@@ -1,12 +1,17 @@
-// src/components/Dashboard.js
 import React, { useEffect, useMemo, useState } from "react";
-import Sidebar from "./Sidebar";
-import Navbar from "./Navbar";
-import { useSelector } from "react-redux";
+import Sidebar from "./Sidebar.js";
+import Navbar from "./Navbar.js";
+import { useDispatch, useSelector } from "react-redux";
+import { addToast } from "../store/uiSlice.js";
+import EmptyState from "./EmptyState.js";
+import Skeleton from "./Skeleton.js";
+import { downloadJSON, downloadCSV } from "../utils/exporters.js";
+
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, BarChart, Bar, CartesianGrid, Label,
 } from "recharts";
+
 import {
   fetchEfficientFrontier,
   fetchSharpeComparison,
@@ -14,8 +19,9 @@ import {
   fetchAllocation,
   backtestEvolution,
   stressSim,
-} from "../lib/mockApi";
+} from "../lib/mockApi.js";
 
+// ---------- UI helpers ----------
 const Card = ({ title, children, className = "" }) => (
   <div className={`bg-[#0f1422] border border-zinc-800/70 rounded-2xl p-4 shadow-sm ${className}`}>
     {title ? (
@@ -49,6 +55,7 @@ const tooltipStyles = {
 };
 
 export default function Dashboard() {
+  const dispatch = useDispatch();
   const { dataset, risk, options } = useSelector((s) => s.ui);
 
   const [activeTab, setActiveTab] = useState("compare");
@@ -77,70 +84,111 @@ export default function Dashboard() {
 
   const constraints = useMemo(() => ({ sectorCaps, turnoverCap, esgExclude }), [sectorCaps, turnoverCap, esgExclude]);
 
+  // ---------- Effects with error handling + toasts ----------
+
   // Initial load
   useEffect(() => {
     (async () => {
-      setLoading((l) => ({ ...l, frontier: true, sharpe: true, qaoa: true, alloc: true, evo: true }));
-      const [f, s, bits] = await Promise.all([
-        fetchEfficientFrontier({ risk, constraints }),
-        fetchSharpeComparison({}),
-        runQAOASelection({ constraints }),
-      ]);
-      setFrontier(f);
-      setSharpeData(s);
-      setTopBits(bits);
-      const allocData = await fetchAllocation({ topBits: bits[0]?.bits || "10101", hybrid: useHybrid });
-      setAlloc(allocData);
-      const evo = await backtestEvolution({ freq: rebalanceFreq, hybrid: useHybrid });
-      setEvolution(evo);
-      setLoading((l) => ({ ...l, frontier: false, sharpe: false, qaoa: false, alloc: false, evo: false }));
+      try {
+        setLoading((l) => ({ ...l, frontier: true, sharpe: true, qaoa: true, alloc: true, evo: true }));
+        const [f, s, bits] = await Promise.all([
+          fetchEfficientFrontier({ risk, constraints }),
+          fetchSharpeComparison({}),
+          runQAOASelection({ constraints }),
+        ]);
+        setFrontier(f);
+        setSharpeData(s);
+        setTopBits(bits);
+
+        const allocData = await fetchAllocation({ topBits: bits[0]?.bits || "10101", hybrid: useHybrid });
+        setAlloc(allocData);
+
+        const evo = await backtestEvolution({ freq: rebalanceFreq, hybrid: useHybrid });
+        setEvolution(evo);
+      } catch (e) {
+        console.error(e);
+        dispatch(addToast({ type: "error", msg: "Initial data load failed. Try again." }));
+      } finally {
+        setLoading((l) => ({ ...l, frontier: false, sharpe: false, qaoa: false, alloc: false, evo: false }));
+      }
     })();
-  }, []); // run once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Update frontier when risk changes
   useEffect(() => {
     (async () => {
-      setLoading((l) => ({ ...l, frontier: true }));
-      const f = await fetchEfficientFrontier({ risk, constraints });
-      setFrontier(f);
-      setLoading((l) => ({ ...l, frontier: false }));
+      try {
+        setLoading((l) => ({ ...l, frontier: true }));
+        const f = await fetchEfficientFrontier({ risk, constraints });
+        setFrontier(f);
+      } catch (e) {
+        console.error(e);
+        dispatch(addToast({ type: "error", msg: "Failed to update frontier." }));
+      } finally {
+        setLoading((l) => ({ ...l, frontier: false }));
+      }
     })();
-  }, [risk]); // eslint-disable-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [risk]);
 
   // Re-run backtest when rebalancing / hybrid changes
   useEffect(() => {
     (async () => {
-      setLoading((l) => ({ ...l, evo: true }));
-      const evo = await backtestEvolution({ freq: rebalanceFreq, hybrid: useHybrid });
-      setEvolution(evo);
-      setLoading((l) => ({ ...l, evo: false }));
+      try {
+        setLoading((l) => ({ ...l, evo: true }));
+        const evo = await backtestEvolution({ freq: rebalanceFreq, hybrid: useHybrid });
+        setEvolution(evo);
+      } catch (e) {
+        console.error(e);
+        dispatch(addToast({ type: "error", msg: "Failed to recompute evolution." }));
+      } finally {
+        setLoading((l) => ({ ...l, evo: false }));
+      }
     })();
-  }, [rebalanceFreq, useHybrid]); // eslint-disable-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rebalanceFreq, useHybrid]);
 
   // Recompute stress whenever controls or evolution changes
   useEffect(() => {
     (async () => {
-      setLoading((l) => ({ ...l, stress: true }));
-      const last = evolution[evolution.length - 1] || { Quantum: 121900, Classical: 112100 };
-      const res = await stressSim({ lastQuantum: last.Quantum, lastClassical: last.Classical, stress });
-      setStressed(res);
-      setLoading((l) => ({ ...l, stress: false }));
+      try {
+        setLoading((l) => ({ ...l, stress: true }));
+        const last = evolution[evolution.length - 1] || { Quantum: 121900, Classical: 112100 };
+        const res = await stressSim({ lastQuantum: last.Quantum, lastClassical: last.Classical, stress });
+        setStressed(res);
+      } catch (e) {
+        console.error(e);
+        dispatch(addToast({ type: "error", msg: "Failed to run stress simulation." }));
+      } finally {
+        setLoading((l) => ({ ...l, stress: false }));
+      }
     })();
-  }, [stress, evolution]); // eslint-disable-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stress, evolution]);
 
+  // Apply constraints
   async function handleApplyConstraints() {
-    setLoading((l) => ({ ...l, qaoa: true, alloc: true, frontier: true }));
-    const [bits, f] = await Promise.all([
-      runQAOASelection({ constraints }),
-      fetchEfficientFrontier({ risk, constraints }),
-    ]);
-    setTopBits(bits);
-    const newAlloc = await fetchAllocation({ topBits: bits[0]?.bits || "10101", hybrid: useHybrid });
-    setAlloc(newAlloc);
-    setFrontier(f);
-    setLoading((l) => ({ ...l, qaoa: false, alloc: false, frontier: false }));
+    try {
+      setLoading((l) => ({ ...l, qaoa: true, alloc: true, frontier: true }));
+      const [bits, f] = await Promise.all([
+        runQAOASelection({ constraints }),
+        fetchEfficientFrontier({ risk, constraints }),
+      ]);
+      setTopBits(bits);
+      const newAlloc = await fetchAllocation({ topBits: bits[0]?.bits || "10101", hybrid: useHybrid });
+      setAlloc(newAlloc);
+      setFrontier(f);
+      dispatch(addToast({ type: "success", msg: "Constraints applied." }));
+    } catch (e) {
+      console.error(e);
+      dispatch(addToast({ type: "error", msg: "Failed to apply constraints." }));
+    } finally {
+      setLoading((l) => ({ ...l, qaoa: false, alloc: false, frontier: false }));
+    }
   }
 
+  // ---------- Derived UI ----------
   const datasetLabel =
     dataset === "nifty50" ? "NIFTY 50" :
     dataset === "crypto" ? "Crypto" :
@@ -154,6 +202,7 @@ export default function Dashboard() {
   const showStress = !options?.length || options.includes("Stress Testing");
   const showClassical = !options?.length || options.includes("Classical Comparison");
 
+  // ---------- Render ----------
   return (
     <div className="flex min-h-screen bg-[#0b0f1a] text-gray-100">
       <Sidebar />
@@ -228,7 +277,7 @@ export default function Dashboard() {
                       className="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-sm disabled:opacity-60"
                       disabled={loading.qaoa || loading.alloc || loading.frontier}
                     >
-                      {loading.qaoa || loading.alloc || loading.frontier ? "Applying..." : "Apply Constraints"}
+                      {(loading.qaoa || loading.alloc || loading.frontier) ? "Applying..." : "Apply Constraints"}
                     </button>
                   </Card>
                 </div>
@@ -237,22 +286,28 @@ export default function Dashboard() {
                   {/* Efficient Frontier */}
                   <Card title="Efficient Frontier">
                     <div className="h-[280px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={frontier} margin={{ top: 10, right: 15, left: 16, bottom: 8 }}>
-                          <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.15} />
-                          <XAxis dataKey="risk" stroke="#a1a1aa" tickMargin={6} />
-                          <YAxis stroke="#a1a1aa" tickFormatter={(v) => `${Number(v).toFixed(1)}%`} tickMargin={6} width={64} />
-                          <Tooltip
-                            formatter={(v, n) => (n === "return" ? `${Number(v).toFixed(2)}%` : v)}
-                            labelFormatter={(lab) => `Risk (σ): ${lab}`}
-                            contentStyle={tooltipStyles.contentStyle}
-                            labelStyle={tooltipStyles.labelStyle}
-                            itemStyle={tooltipStyles.itemStyle}
-                            wrapperStyle={tooltipStyles.wrapperStyle}
-                          />
-                          <Line type="monotone" dataKey="return" stroke="#7C3AED" strokeWidth={2} dot={{ r: 4 }} />
-                        </LineChart>
-                      </ResponsiveContainer>
+                      {loading.frontier ? (
+                        <Skeleton className="h-full w-full" />
+                      ) : !frontier?.length ? (
+                        <EmptyState title="No frontier yet" subtitle="Pick a dataset and click Apply Constraints." />
+                      ) : (
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={frontier} margin={{ top: 10, right: 15, left: 16, bottom: 8 }}>
+                            <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.15} />
+                            <XAxis dataKey="risk" stroke="#a1a1aa" tickMargin={6} />
+                            <YAxis stroke="#a1a1aa" tickFormatter={(v) => `${Number(v).toFixed(1)}%`} tickMargin={6} width={64} />
+                            <Tooltip
+                              formatter={(v, n) => (n === "return" ? `${Number(v).toFixed(2)}%` : v)}
+                              labelFormatter={(lab) => `Risk (σ): ${lab}`}
+                              contentStyle={tooltipStyles.contentStyle}
+                              labelStyle={tooltipStyles.labelStyle}
+                              itemStyle={tooltipStyles.itemStyle}
+                              wrapperStyle={tooltipStyles.wrapperStyle}
+                            />
+                            <Line type="monotone" dataKey="return" stroke="#7C3AED" strokeWidth={2} dot={{ r: 4 }} />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      )}
                     </div>
                     <ChartCaption x="Portfolio Risk (σ)" y="Expected Return (%)" />
                   </Card>
@@ -261,20 +316,26 @@ export default function Dashboard() {
                   {showSharpe && (
                     <Card title="Sharpe Ratio Comparison">
                       <div className="h-[280px]">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={sharpeData} margin={{ top: 10, right: 15, left: 10, bottom: 24 }}>
-                            <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.15} />
-                            <XAxis dataKey="name" stroke="#a1a1aa" tickMargin={6} />
-                            <YAxis stroke="#a1a1aa" domain={[0, "dataMax + 0.2"]} width={56} />
-                            <Tooltip
-                              contentStyle={tooltipStyles.contentStyle}
-                              labelStyle={tooltipStyles.labelStyle}
-                              itemStyle={tooltipStyles.itemStyle}
-                              wrapperStyle={tooltipStyles.wrapperStyle}
-                            />
-                            <Bar dataKey="value" fill="#8B5CF6" radius={[8, 8, 0, 0]} />
-                          </BarChart>
-                        </ResponsiveContainer>
+                        {loading.sharpe ? (
+                          <Skeleton className="h-full w-full" />
+                        ) : !sharpeData?.length ? (
+                          <EmptyState title="No Sharpe data" subtitle="Try applying constraints." />
+                        ) : (
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={sharpeData} margin={{ top: 10, right: 15, left: 10, bottom: 24 }}>
+                              <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.15} />
+                              <XAxis dataKey="name" stroke="#a1a1aa" tickMargin={6} />
+                              <YAxis stroke="#a1a1aa" domain={[0, "dataMax + 0.2"]} width={56} />
+                              <Tooltip
+                                contentStyle={tooltipStyles.contentStyle}
+                                labelStyle={tooltipStyles.labelStyle}
+                                itemStyle={tooltipStyles.itemStyle}
+                                wrapperStyle={tooltipStyles.wrapperStyle}
+                              />
+                              <Bar dataKey="value" fill="#8B5CF6" radius={[8, 8, 0, 0]} />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        )}
                       </div>
                       <ChartCaption x="Model" y="Sharpe Ratio" />
                     </Card>
@@ -283,51 +344,57 @@ export default function Dashboard() {
                   {/* Portfolio Allocation */}
                   <Card title="Portfolio Allocation (Weights)">
                     <div className="h-[280px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart margin={{ top: 4, right: 8, bottom: 4, left: 8 }}>
-                          <Tooltip
-                            formatter={(v) => `${Number(v).toFixed(0)}%`}
-                            contentStyle={tooltipStyles.contentStyle}
-                            labelStyle={tooltipStyles.labelStyle}
-                            itemStyle={tooltipStyles.itemStyle}
-                            wrapperStyle={tooltipStyles.wrapperStyle}
-                          />
-                          <Legend
-                            verticalAlign="bottom"
-                            height={28}
-                            wrapperStyle={{ color: "#a1a1aa", fontSize: 12 }}
-                            iconSize={8}
-                          />
-                          <Pie
-                            data={alloc}
-                            dataKey="value"
-                            nameKey="name"
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={60}
-                            outerRadius={activeSlice === null ? 92 : 96}
-                            paddingAngle={1}
-                            isAnimationActive={false}
-                            onMouseEnter={(_, i) => setActiveSlice(i)}
-                            onMouseLeave={() => setActiveSlice(null)}
-                            onTouchStart={(_, i) => setActiveSlice(i)}
-                            onTouchEnd={() => setActiveSlice(null)}
-                            label={false}
-                          >
-                            {alloc.map((_, i) => (
-                              <Cell
-                                key={i}
-                                fill={COLORS[i % COLORS.length]}
-                                fillOpacity={activeSlice === null ? 1 : activeSlice === i ? 1 : 0.95}
-                                stroke="#e5e7eb33"
-                                strokeWidth={activeSlice === i ? 2 : 1}
-                                style={{ transition: "all 120ms ease" }}
-                              />
-                            ))}
-                            <Label value={activeSlice === null ? "Weights (%)" : `${alloc[activeSlice]?.name ?? ""} · ${percent(alloc[activeSlice]?.value || 0, 0)}`} position="center" fill="#e5e7eb" fontSize={12} />
-                          </Pie>
-                        </PieChart>
-                      </ResponsiveContainer>
+                      {loading.alloc ? (
+                        <Skeleton className="h-full w-full" />
+                      ) : !alloc?.length ? (
+                        <EmptyState title="No allocation yet" subtitle="Apply constraints to generate weights." />
+                      ) : (
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart margin={{ top: 4, right: 8, bottom: 4, left: 8 }}>
+                            <Tooltip
+                              formatter={(v) => `${Number(v).toFixed(0)}%`}
+                              contentStyle={tooltipStyles.contentStyle}
+                              labelStyle={tooltipStyles.labelStyle}
+                              itemStyle={tooltipStyles.itemStyle}
+                              wrapperStyle={tooltipStyles.wrapperStyle}
+                            />
+                            <Legend
+                              verticalAlign="bottom"
+                              height={28}
+                              wrapperStyle={{ color: "#a1a1aa", fontSize: 12 }}
+                              iconSize={8}
+                            />
+                            <Pie
+                              data={alloc}
+                              dataKey="value"
+                              nameKey="name"
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={60}
+                              outerRadius={activeSlice === null ? 92 : 96}
+                              paddingAngle={1}
+                              isAnimationActive={false}
+                              onMouseEnter={(_, i) => setActiveSlice(i)}
+                              onMouseLeave={() => setActiveSlice(null)}
+                              onTouchStart={(_, i) => setActiveSlice(i)}
+                              onTouchEnd={() => setActiveSlice(null)}
+                              label={false}
+                            >
+                              {alloc.map((_, i) => (
+                                <Cell
+                                  key={i}
+                                  fill={COLORS[i % COLORS.length]}
+                                  fillOpacity={activeSlice === null ? 1 : activeSlice === i ? 1 : 0.95}
+                                  stroke="#e5e7eb33"
+                                  strokeWidth={activeSlice === i ? 2 : 1}
+                                  style={{ transition: "all 120ms ease" }}
+                                />
+                              ))}
+                              <Label value={centerLabelText} position="center" fill="#e5e7eb" fontSize={12} />
+                            </Pie>
+                          </PieChart>
+                        </ResponsiveContainer>
+                      )}
                     </div>
                   </Card>
 
@@ -335,23 +402,29 @@ export default function Dashboard() {
                   {showClassical && (
                     <Card title="Portfolio Evolution">
                       <div className="h-[280px]">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <LineChart data={evolution} margin={{ top: 10, right: 12, left: 24, bottom: 8 }}>
-                            <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.15} />
-                            <XAxis dataKey="time" stroke="#a1a1aa" tickMargin={6} />
-                            <YAxis stroke="#a1a1aa" tickFormatter={(v) => currency(v)} tickMargin={6} width={88} />
-                            <Tooltip
-                              formatter={(v) => currency(v)}
-                              contentStyle={tooltipStyles.contentStyle}
-                              labelStyle={tooltipStyles.labelStyle}
-                              itemStyle={tooltipStyles.itemStyle}
-                              wrapperStyle={tooltipStyles.wrapperStyle}
-                            />
-                            <Legend />
-                            <Line type="monotone" dataKey="Quantum" stroke="#7C3AED" strokeWidth={2} dot={false} />
-                            <Line type="monotone" dataKey="Classical" stroke="#3B82F6" strokeWidth={2} dot={false} />
-                          </LineChart>
-                        </ResponsiveContainer>
+                        {loading.evo ? (
+                          <Skeleton className="h-full w-full" />
+                        ) : !evolution?.length ? (
+                          <EmptyState title="No evolution yet" subtitle="Change rebalancing or apply constraints." />
+                        ) : (
+                          <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={evolution} margin={{ top: 10, right: 12, left: 24, bottom: 8 }}>
+                              <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.15} />
+                              <XAxis dataKey="time" stroke="#a1a1aa" tickMargin={6} />
+                              <YAxis stroke="#a1a1aa" tickFormatter={(v) => currency(v)} tickMargin={6} width={88} />
+                              <Tooltip
+                                formatter={(v) => currency(v)}
+                                contentStyle={tooltipStyles.contentStyle}
+                                labelStyle={tooltipStyles.labelStyle}
+                                itemStyle={tooltipStyles.itemStyle}
+                                wrapperStyle={tooltipStyles.wrapperStyle}
+                              />
+                              <Legend />
+                              <Line type="monotone" dataKey="Quantum" stroke="#7C3AED" strokeWidth={2} dot={false} />
+                              <Line type="monotone" dataKey="Classical" stroke="#3B82F6" strokeWidth={2} dot={false} />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        )}
                       </div>
                       <ChartCaption x="Time (rebalance periods)" y="Portfolio Value (₹)" />
                     </Card>
@@ -365,23 +438,29 @@ export default function Dashboard() {
               <div className="grid grid-cols-1 gap-6">
                 <Card title="Portfolio Value Over Time">
                   <div className="h-[320px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={evolution} margin={{ top: 10, right: 12, left: 24, bottom: 8 }}>
-                        <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.15} />
-                        <XAxis dataKey="time" stroke="#a1a1aa" tickMargin={6} />
-                        <YAxis stroke="#a1a1aa" tickFormatter={(v) => currency(v)} tickMargin={6} width={88} />
-                        <Tooltip
-                          formatter={(v) => currency(v)}
-                          contentStyle={tooltipStyles.contentStyle}
-                          labelStyle={tooltipStyles.labelStyle}
-                          itemStyle={tooltipStyles.itemStyle}
-                          wrapperStyle={tooltipStyles.wrapperStyle}
-                        />
-                        <Legend />
-                        <Line type="monotone" dataKey="Quantum" stroke="#7C3AED" strokeWidth={2} />
-                        <Line type="monotone" dataKey="Classical" stroke="#3B82F6" strokeWidth={2} />
-                      </LineChart>
-                    </ResponsiveContainer>
+                    {loading.evo ? (
+                      <Skeleton className="h-full w-full" />
+                    ) : !evolution?.length ? (
+                      <EmptyState title="No evolution yet" subtitle="Adjust rebalancing/hybrid and try again." />
+                    ) : (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={evolution} margin={{ top: 10, right: 12, left: 24, bottom: 8 }}>
+                          <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.15} />
+                          <XAxis dataKey="time" stroke="#a1a1aa" tickMargin={6} />
+                          <YAxis stroke="#a1a1aa" tickFormatter={(v) => currency(v)} tickMargin={6} width={88} />
+                          <Tooltip
+                            formatter={(v) => currency(v)}
+                            contentStyle={tooltipStyles.contentStyle}
+                            labelStyle={tooltipStyles.labelStyle}
+                            itemStyle={tooltipStyles.itemStyle}
+                            wrapperStyle={tooltipStyles.wrapperStyle}
+                          />
+                          <Legend />
+                          <Line type="monotone" dataKey="Quantum" stroke="#7C3AED" strokeWidth={2} />
+                          <Line type="monotone" dataKey="Classical" stroke="#3B82F6" strokeWidth={2} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    )}
                   </div>
                   <ChartCaption x="Time (rebalance periods)" y="Portfolio Value (₹)" />
                 </Card>
@@ -447,21 +526,27 @@ export default function Dashboard() {
 
                 <Card title="Stress Result (Simulated NAV)">
                   <div className="h-[280px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={stressed} margin={{ top: 10, right: 12, left: 24, bottom: 8 }}>
-                        <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.15} />
-                        <XAxis dataKey="name" stroke="#a1a1aa" tickMargin={6} />
-                        <YAxis stroke="#a1a1aa" tickFormatter={(v) => currency(v)} tickMargin={6} width={88} />
-                        <Tooltip
-                          formatter={(v) => currency(v)}
-                          contentStyle={tooltipStyles.contentStyle}
-                          labelStyle={tooltipStyles.labelStyle}
-                          itemStyle={tooltipStyles.itemStyle}
-                          wrapperStyle={tooltipStyles.wrapperStyle}
-                        />
-                        <Bar dataKey="value" fill="#F59E0B" radius={[8, 8, 0, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
+                    {loading.stress ? (
+                      <Skeleton className="h-full w-full" />
+                    ) : !stressed?.length ? (
+                      <EmptyState title="No stress result yet" subtitle="Move the sliders to simulate shocks." />
+                    ) : (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={stressed} margin={{ top: 10, right: 12, left: 24, bottom: 8 }}>
+                          <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.15} />
+                          <XAxis dataKey="name" stroke="#a1a1aa" tickMargin={6} />
+                          <YAxis stroke="#a1a1aa" tickFormatter={(v) => currency(v)} tickMargin={6} width={88} />
+                          <Tooltip
+                            formatter={(v) => currency(v)}
+                            contentStyle={tooltipStyles.contentStyle}
+                            labelStyle={tooltipStyles.labelStyle}
+                            itemStyle={tooltipStyles.itemStyle}
+                            wrapperStyle={tooltipStyles.wrapperStyle}
+                          />
+                          <Bar dataKey="value" fill="#F59E0B" radius={[8, 8, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    )}
                   </div>
                   <ChartCaption x="Model" y="NAV (₹)" />
                 </Card>
@@ -519,7 +604,7 @@ export default function Dashboard() {
                       className="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60"
                       disabled={loading.qaoa || loading.alloc || loading.frontier}
                     >
-                      {loading.qaoa || loading.alloc || loading.frontier ? "Applying..." : "Apply Constraints"}
+                      {(loading.qaoa || loading.alloc || loading.frontier) ? "Applying..." : "Apply Constraints"}
                     </button>
                   </div>
                 </Card>
@@ -529,38 +614,53 @@ export default function Dashboard() {
             {/* EXPLAIN TAB */}
             {activeTab === "explain" && (
               <Card title="Top Measured Portfolios (Demo)">
-                <div className="overflow-auto border border-zinc-800/70 rounded-xl">
-                  <table className="w-full text-sm">
-                    <thead className="bg-[#0f1422] text-zinc-300">
-                      <tr>
-                        <th className="text-left p-3">Bitstring</th>
-                        <th className="text-right p-3">Prob.</th>
-                        <th className="text-right p-3">Exp. Return</th>
-                        <th className="text-right p-3">Risk</th>
-                        <th className="text-left p-3">Constraints</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {topBits.map((r, i) => (
-                        <tr key={i} className="border-t border-zinc-800/50">
-                          <td className="p-3 font-mono">{r.bits}</td>
-                          <td className="p-3 text-right">{percent(r.p * 100, 1)}</td>
-                          <td className="p-3 text-right">{percent(r.expRet, 1)}</td>
-                          <td className="p-3 text-right">{percent(r.risk, 1)}</td>
-                          <td className="p-3">{r.constraints}</td>
+                {!topBits?.length ? (
+                  <EmptyState title="No solutions yet" subtitle="Apply constraints to compute candidate bitstrings." />
+                ) : (
+                  <div className="overflow-auto border border-zinc-800/70 rounded-xl">
+                    <table className="w-full text-sm">
+                      <thead className="bg-[#0f1422] text-zinc-300">
+                        <tr>
+                          <th className="text-left p-3">Bitstring</th>
+                          <th className="text-right p-3">Prob.</th>
+                          <th className="text-right p-3">Exp. Return</th>
+                          <th className="text-right p-3">Risk</th>
+                          <th className="text-left p-3">Constraints</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {topBits.map((r, i) => (
+                          <tr key={i} className="border-t border-zinc-800/50">
+                            <td className="p-3 font-mono">{r.bits}</td>
+                            <td className="p-3 text-right">{percent(r.p * 100, 1)}</td>
+                            <td className="p-3 text-right">{percent(r.expRet, 1)}</td>
+                            <td className="p-3 text-right">{percent(r.risk, 1)}</td>
+                            <td className="p-3">{r.constraints}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </Card>
             )}
 
-            {/* Footer */}
+            {/* Footer / Exports */}
             {showStress && (
-              <div className="pt-2 pb-8">
-                <button className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 transition">
-                  Export Results
+              <div className="pt-2 pb-8 flex flex-wrap gap-2">
+                <button
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 transition"
+                  onClick={() =>
+                    downloadJSON("results.json", { frontier, sharpeData, alloc, evolution, topBits, stressed })
+                  }
+                >
+                  Export JSON
+                </button>
+                <button
+                  className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 transition border border-zinc-700"
+                  onClick={() => downloadCSV("top_solutions.csv", topBits)}
+                >
+                  Export Top Solutions (CSV)
                 </button>
               </div>
             )}

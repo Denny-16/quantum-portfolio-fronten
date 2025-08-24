@@ -1,4 +1,3 @@
-// Tiny helpers to download JSON/CSV from in-memory data
 export function downloadJSON(filename, data) {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
