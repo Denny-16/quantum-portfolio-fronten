@@ -1,9 +1,8 @@
 // src/components/Dashboard.js
 import React, { useEffect, useMemo, useState } from "react";
-// Sidebar removed
 import Navbar from "./Navbar.js";
 import { useDispatch, useSelector } from "react-redux";
-import { addToast, setActiveTab, setTimeHorizon, setThreshold } from "../store/uiSlice";
+import { addToast, setTimeHorizon, setThreshold, setInitialEquity } from "../store/uiSlice";
 import EmptyState from "./EmptyState.js";
 import Skeleton from "./Skeleton.js";
 import { downloadJSON, downloadCSV } from "../utils/exporters.js";
@@ -30,23 +29,6 @@ const Card = ({ title, children, className = "" }) => (
       <h2 className="text-[15px] md:text-lg font-semibold tracking-tight mb-2 text-zinc-100">{title}</h2>
     ) : null}
     {children}
-  </div>
-);
-
-const HomeCard = ({ title, subtitle, onGo, action = "Open" }) => (
-  <div className="bg-gradient-to-b from-[#11182b] to-[#0f1422] border border-zinc-800/70 rounded-2xl p-5 shadow-sm">
-    <div className="flex items-start justify-between gap-4">
-      <div>
-        <h3 className="text-base md:text-lg font-semibold tracking-tight text-zinc-100">{title}</h3>
-        <p className="text-sm text-zinc-400 mt-1">{subtitle}</p>
-      </div>
-      <button
-        onClick={onGo}
-        className="shrink-0 px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-sm"
-      >
-        {action}
-      </button>
-    </div>
   </div>
 );
 
@@ -270,13 +252,14 @@ export default function Dashboard() {
   const showStress = !options?.length || options.includes("Stress Testing");
   const showClassical = !options?.length || options.includes("Classical Comparison");
 
-  // ---------- Home (no sidebar) ----------
+  // ---------- Home (no cards; constraints + two-pane results) ----------
   const renderHome = () => (
     <div className="max-w-7xl mx-auto px-5 py-6 md:py-8 space-y-6">
       {/* Constraints panel on Home */}
       <Card title="Constraints">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Sector caps */}
+          <div className="lg:col-span-1">
             <h3 className="text-sm font-medium text-zinc-300 mb-2">Sector Caps (%)</h3>
             <div className="grid grid-cols-2 gap-4 text-sm">
               {Object.keys(sectorCaps).map((k) => (
@@ -295,7 +278,8 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="space-y-4 text-sm">
+          {/* Toggles + Turnover */}
+          <div className="lg:col-span-1 space-y-4 text-sm">
             <label className="inline-flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -328,6 +312,21 @@ export default function Dashboard() {
               />
               <span>Hybrid (QAOA + Weights): {useHybrid ? "Enabled" : "Disabled"}</span>
             </label>
+          </div>
+
+          {/* Initial equity + apply */}
+          <div className="lg:col-span-1 space-y-4">
+            <div>
+              <label className="block text-zinc-300 mb-1">Initial Equity (₹)</label>
+              <input
+                type="number"
+                min={0}
+                step={1000}
+                value={initialEquity}
+                onChange={(e) => dispatch(setInitialEquity(Number(e.target.value) || 0))}
+                className="w-full bg-[#0b0f1a] border border-zinc-700 rounded-lg px-3 py-2"
+              />
+            </div>
 
             <button
               onClick={handleApplyConstraints}
@@ -340,53 +339,102 @@ export default function Dashboard() {
         </div>
       </Card>
 
-      <div>
-        <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">Welcome</h2>
-        <p className="text-zinc-400 mt-1">
-          Pick a section from the navbar, or use these cards to learn and jump in.
-        </p>
+      {/* Two-pane results under constraints: left list, right pie */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Chosen companies list (from current alloc) */}
+        <Card title="Chosen Companies (by Constraints)">
+          {!alloc?.length ? (
+            <EmptyState title="No allocation yet" subtitle="Apply constraints to generate weights." />
+          ) : (
+            <div className="overflow-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-[#0f1422] text-zinc-300">
+                  <tr>
+                    <th className="text-left p-3">Company</th>
+                    <th className="text-right p-3">Weight</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {alloc.map((row, i) => (
+                    <tr key={i} className="border-t border-zinc-800/50">
+                      <td className="p-3">{row.name}</td>
+                      <td className="p-3 text-right">{percent(row.value, 0)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Card>
+
+        {/* Allocation pie (same data) */}
+        <Card title="Allocation (Pie)">
+          <div className="h-[280px]">
+            {!alloc?.length ? (
+              <EmptyState title="No allocation yet" subtitle="Apply constraints to generate weights." />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart margin={{ top: 4, right: 8, bottom: 4, left: 8 }}>
+                  <Tooltip
+                    formatter={(v) => `${Number(v).toFixed(0)}%`}
+                    contentStyle={tooltipStyles.contentStyle}
+                    labelStyle={tooltipStyles.labelStyle}
+                    itemStyle={tooltipStyles.itemStyle}
+                    wrapperStyle={tooltipStyles.wrapperStyle}
+                  />
+                  <Legend verticalAlign="bottom" height={28} wrapperStyle={{ color: "#a1a1aa", fontSize: 12 }} iconSize={8} />
+                  <Pie
+                    data={alloc}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={activeSlice === null ? 92 : 96}
+                    paddingAngle={1}
+                    isAnimationActive={false}
+                    onMouseEnter={(_, i) => setActiveSlice(i)}
+                    onMouseLeave={() => setActiveSlice(null)}
+                    onTouchStart={(_, i) => setActiveSlice(i)}
+                    onTouchEnd={() => setActiveSlice(null)}
+                    label={false}
+                  >
+                    {alloc.map((_, i) => (
+                      <Cell
+                        key={i}
+                        fill={COLORS[i % COLORS.length]}
+                        fillOpacity={activeSlice === null ? 1 : activeSlice === i ? 1 : 0.95}
+                        stroke="#e5e7eb33"
+                        strokeWidth={activeSlice === i ? 2 : 1}
+                        style={{ transition: "all 120ms ease" }}
+                      />
+                    ))}
+                    <Label
+                      value={activeSlice === null ? "Weights (%)" : `${alloc[activeSlice]?.name ?? ""} · ${percent(alloc[activeSlice]?.value || 0, 0)}`}
+                      position="center"
+                      fill="#e5e7eb"
+                      fontSize={12}
+                    />
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </Card>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <HomeCard
-          title="Quantum vs Classical"
-          subtitle="Compare QAOA-driven portfolios vs classical baselines. Time (days) control lives inside this section."
-          onGo={() => dispatch(setActiveTab("compare"))}
-        />
-        <HomeCard
-          title="Portfolio Evolution"
-          subtitle="Simulate multi-period rebalancing and see NAV over your chosen horizon. Time (days) control lives here."
-          onGo={() => dispatch(setActiveTab("evolution"))}
-        />
-        <HomeCard
-          title="Stress Testing"
-          subtitle="Apply macro shocks (rates, oil, tech, FX). Threshold control is here."
-          onGo={() => dispatch(setActiveTab("stress"))}
-        />
-        <HomeCard
-          title="Explain"
-          subtitle="See top bitstrings measured by QAOA: probabilities, return, risk, and constraints."
-          onGo={() => dispatch(setActiveTab("explain"))}
-        />
-      </div>
-
+      {/* Small tip + current setup */}
       <Card>
         <div className="text-sm text-zinc-300 leading-relaxed">
           <p className="mb-2">
-            <span className="font-medium text-zinc-100">Tip:</span> Use the navbar to open a section. Click the same
-            tab again to return to <span className="font-medium text-zinc-100">Home</span>.
+            Use the navbar to open a section. Click the same tab again to return to <span className="font-medium text-zinc-100">Home</span>.
           </p>
-          <p className="mb-2">
-            Current setup — Dataset: <span className="text-zinc-100">{datasetLabel}</span>, Risk:{" "}
-            <span className="text-zinc-100">{riskPretty}</span>, Initial Equity:{" "}
-            <span className="text-zinc-100">{`₹${initialEquity.toLocaleString("en-IN")}`}</span>, Horizon:{" "}
-            <span className="text-zinc-100">{timeHorizon} days</span>, Threshold:{" "}
-            <span className="text-zinc-100">{threshold}%</span>.
-          </p>
-          <p className="text-zinc-400">
-            Time inputs exist only in <span className="text-zinc-200">Quantum vs Classical</span> and{" "}
-            <span className="text-zinc-200">Portfolio Evolution</span>. Threshold lives in{" "}
-            <span className="text-zinc-200">Stress Testing</span>.
+          <p className="mb-0">
+            Current setup — Dataset: <span className="text-zinc-100">{datasetLabel}</span>, Risk:
+            <span className="text-zinc-100"> {riskPretty}</span>, Initial Equity:
+            <span className="text-zinc-100"> {`₹${initialEquity.toLocaleString("en-IN")}`}</span>, Horizon:
+            <span className="text-zinc-100"> {timeHorizon} days</span>, Threshold:
+            <span className="text-zinc-100"> {threshold}%</span>.
           </p>
         </div>
       </Card>
@@ -396,15 +444,14 @@ export default function Dashboard() {
   // ---------- Page ----------
   return (
     <div className="flex min-h-screen bg-[#0b0f1a] text-gray-100">
-      {/* Navbar is always shown */}
       <div className="flex-1 min-w-0 flex flex-col">
         <Navbar />
 
-        {/* Home (no sidebar) */}
+        {/* Home */}
         {activeTab === null ? (
           <div className="flex-1 overflow-auto">{renderHome()}</div>
         ) : (
-          // Section pages (no sidebar anymore)
+          // Section pages
           <div className="flex-1 overflow-auto">
             <div className="max-w-7xl mx-auto px-5 py-6 md:py-8 space-y-6">
               {/* Section header */}
@@ -429,7 +476,7 @@ export default function Dashboard() {
               {/* Section bodies */}
               {activeTab === "compare" && (
                 <>
-                  {/* Section-specific controls: Time + Rebalancing + Hybrid + Apply */}
+                  {/* Time + Rebalancing + Hybrid + Apply */}
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                     <Card title="Time (days)">
                       <input
@@ -531,7 +578,7 @@ export default function Dashboard() {
                       </Card>
                     )}
 
-                    {/* Portfolio Allocation */}
+                    {/* Allocation */}
                     <Card title="Portfolio Allocation (Weights)">
                       <div className="h-[280px]">
                         {loading.alloc ? (
@@ -588,37 +635,7 @@ export default function Dashboard() {
                       </div>
                     </Card>
 
-                    {/* Portfolio Evolution */}
-                    {showClassical && (
-                      <Card title="Portfolio Evolution">
-                        <div className="h-[280px]">
-                          {loading.evo ? (
-                            <Skeleton className="h-full w-full" />
-                          ) : !evolution?.length ? (
-                            <EmptyState title="No evolution yet" subtitle="Change rebalancing or apply constraints." />
-                          ) : (
-                            <ResponsiveContainer width="100%" height="100%">
-                              <LineChart data={evolution} margin={{ top: 10, right: 12, left: 24, bottom: 8 }}>
-                                <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.15} />
-                                <XAxis dataKey="time" stroke="#a1a1aa" tickMargin={6} />
-                                <YAxis stroke="#a1a1aa" tickFormatter={(v) => currency(v)} tickMargin={6} width={88} />
-                                <Tooltip
-                                  formatter={(v) => currency(v)}
-                                  contentStyle={tooltipStyles.contentStyle}
-                                  labelStyle={tooltipStyles.labelStyle}
-                                  itemStyle={tooltipStyles.itemStyle}
-                                  wrapperStyle={tooltipStyles.wrapperStyle}
-                                />
-                                <Legend />
-                                <Line type="monotone" dataKey="Quantum" stroke="#7C3AED" strokeWidth={2} dot={false} />
-                                <Line type="monotone" dataKey="Classical" stroke="#3B82F6" strokeWidth={2} dot={false} />
-                              </LineChart>
-                            </ResponsiveContainer>
-                          )}
-                        </div>
-                        <ChartCaption x="Time (days)" y="Portfolio Value (₹)" />
-                      </Card>
-                    )}
+                    {/* NOTE: Portfolio Evolution chart intentionally REMOVED from Compare */}
                   </div>
                 </>
               )}
@@ -756,7 +773,7 @@ export default function Dashboard() {
                         <input
                           type="range" min="0" max="100"
                           value={threshold}
-                          onChange={(e) => dispatch(setThreshold(Number(e.target.value)))}
+                          onChange={(e) => dispatch(setThreshold(Number(e.target.value) || 0))}
                           className="w-full accent-indigo-500"
                         />
                         <div className="text-zinc-400 mt-1">{threshold}%</div>
