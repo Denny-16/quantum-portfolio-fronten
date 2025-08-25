@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import Sidebar from "./Sidebar.js";
 import Navbar from "./Navbar.js";
 import { useDispatch, useSelector } from "react-redux";
-import { addToast } from "../store/uiSlice"; // extensionless is fine with Parcel
+import { addToast, toggleSidebar } from "../store/uiSlice"; // added toggleSidebar here
 import EmptyState from "./EmptyState.js";
 import Skeleton from "./Skeleton.js";
 import { downloadJSON, downloadCSV } from "../utils/exporters.js";
@@ -67,10 +67,11 @@ export default function Dashboard() {
   const safeRiskLevel = (typeof riskLevel === "string" && riskLevel.length) ? riskLevel : "medium";
   const riskPretty = safeRiskLevel.charAt(0).toUpperCase() + safeRiskLevel.slice(1);
 
-  const [activeTab, setActiveTab] = useState("compare");
+  // ✅ No default section selected
+  const [activeTab, setActiveTab] = useState(null);
   const [activeSlice, setActiveSlice] = useState(null);
 
-  // Controls
+  // Controls (Constraints now live in the Sidebar)
   const [rebalanceFreq, setRebalanceFreq] = useState("Monthly");
   const [useHybrid, setUseHybrid] = useState(true);
   const [sectorCaps, setSectorCaps] = useState({ Tech: 40, Finance: 35, Healthcare: 35, Energy: 25 });
@@ -109,7 +110,7 @@ export default function Dashboard() {
         setSharpeData(s);
         setTopBits(bits);
 
-        // PASS dataset here
+        // pass dataset to allocation
         const allocData = await fetchAllocation({
           topBits: bits[0]?.bits || "10101",
           hybrid: useHybrid,
@@ -130,7 +131,7 @@ export default function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Update frontier when riskLevel / threshold / constraints change
+  // Update frontier when prefs change
   useEffect(() => {
     (async () => {
       try {
@@ -164,7 +165,7 @@ export default function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rebalanceFreq, useHybrid, initialEquity, timeHorizon]);
 
-  // Auto-apply QAOA + Allocation + Frontier when threshold changes
+  // Auto-apply when threshold changes
   useEffect(() => {
     (async () => {
       try {
@@ -174,7 +175,6 @@ export default function Dashboard() {
           fetchEfficientFrontier({ riskLevel: safeRiskLevel, constraints, threshold }),
         ]);
         setTopBits(bits);
-        // PASS dataset here
         const newAlloc = await fetchAllocation({
           topBits: bits[0]?.bits || "10101",
           hybrid: useHybrid,
@@ -193,7 +193,7 @@ export default function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [threshold, useHybrid, constraints, safeRiskLevel]);
 
-  // Recompute stress whenever controls or evolution changes
+  // Recompute stress whenever controls or evolution change
   useEffect(() => {
     (async () => {
       try {
@@ -211,7 +211,7 @@ export default function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stress, evolution]);
 
-  // Apply constraints manually (button)
+  // Apply constraints manually (Sidebar's button can call this too if you pass it down)
   async function handleApplyConstraints() {
     try {
       setLoading((l) => ({ ...l, qaoa: true, alloc: true, frontier: true }));
@@ -220,7 +220,6 @@ export default function Dashboard() {
         fetchEfficientFrontier({ riskLevel: safeRiskLevel, constraints, threshold }),
       ]);
       setTopBits(bits);
-      // PASS dataset here
       const newAlloc = await fetchAllocation({
         topBits: bits[0]?.bits || "10101",
         hybrid: useHybrid,
@@ -252,55 +251,83 @@ export default function Dashboard() {
   const showStress = !options?.length || options.includes("Stress Testing");
   const showClassical = !options?.length || options.includes("Classical Comparison");
 
-  // ---------- Render ----------
   return (
     <div className="flex min-h-screen bg-[#0b0f1a] text-gray-100">
-      <Sidebar />
+      {/* Sidebar now holds Constraints UI */}
+      <Sidebar
+        sectorCaps={sectorCaps}
+        setSectorCaps={setSectorCaps}
+        esgExclude={esgExclude}
+        setEsgExclude={setEsgExclude}
+        turnoverCap={turnoverCap}
+        setTurnoverCap={setTurnoverCap}
+        onApplyConstraints={handleApplyConstraints}
+        applying={loading.qaoa || loading.alloc || loading.frontier}
+      />
+
       <div className="flex-1 min-w-0 flex flex-col">
+        {/* Keep your existing Navbar (branding, etc.) */}
         <Navbar />
 
-        {/* Sticky header + tabs */}
-        <div className="sticky top-0 z-10 bg-[#0b0f1a]/80 backdrop-blur border-b border-zinc-800/60">
-          <div className="max-w-7xl mx-auto px-5 py-4 flex flex-wrap items-end justify-between gap-3">
-            <div className="space-y-1">
-              <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">
-                Quantum-Inspired Portfolio Optimization with QAOA
-              </h1>
-              <p className="text-zinc-400 text-sm">
-                Dataset: <span className="text-zinc-200">{datasetLabel}</span>
-                {" • "}Risk: <span className="text-zinc-200">{riskPretty}</span>
-                {" • "}Rebalance: <span className="text-zinc-200">{rebalanceFreq}</span>
-                {" • "}Hybrid: <span className="text-zinc-200">{useHybrid ? "On" : "Off"}</span>
-                {" • "}Init: <span className="text-zinc-200">{`₹${initialEquity.toLocaleString("en-IN")}`}</span>
-                {" • "}Horizon: <span className="text-zinc-200">{timeHorizon} days</span>
-                {" • "}Thresh: <span className="text-zinc-200">{threshold}%</span>
-              </p>
-            </div>
-
+        {/* Tabs + "Constraints" button row */}
+        <div className="sticky top-14 z-10 bg-[#0b0f1a]/80 backdrop-blur border-b border-zinc-800/60">
+          <div className="max-w-7xl mx-auto px-5 py-3 flex items-center justify-between gap-3">
+            {/* Tabs (no default selected) */}
             <div className="bg-[#0f1422] border border-zinc-800/70 rounded-xl p-1 flex flex-wrap">
               {[
-                { key: "compare", label: "Quantum vs Classical" },
-                { key: "evolution", label: "Portfolio Evolution" },
-                { key: "insights", label: "Quantum Insights" },
-                { key: "stress", label: "Stress Testing" },
-                { key: "constraints", label: "Constraints" },
-                { key: "explain", label: "Explain" },
-              ].map((t) => (
-                <button
-                  key={t.key}
-                  onClick={() => setActiveTab(t.key)}
-                  className={`px-3 md:px-4 py-2 rounded-lg text-sm transition ${activeTab === t.key ? "bg-zinc-800/60" : "hover:bg-zinc-800/30"}`}
-                >
-                  {t.label}
-                </button>
-              ))}
+  { key: "compare", label: "Quantum vs Classical" },
+  { key: "evolution", label: "Portfolio Evolution" },
+  { key: "insights", label: "Quantum Insights" },
+  { key: "stress", label: "Stress Testing" },
+  { key: "explain", label: "Explain" },
+].map((t) => (
+  <button
+    key={t.key}
+    onClick={() => setActiveTab(activeTab === t.key ? null : t.key)}
+    className={`px-3 md:px-4 py-2 rounded-lg text-sm transition ${
+      activeTab === t.key ? "bg-zinc-800/60" : "hover:bg-zinc-800/30"
+    }`}
+  >
+    {t.label}
+  </button>
+))}
+
             </div>
+
+            {/* Constraints quick button → toggles sidebar */}
+           
+          </div>
+        </div>
+
+        {/* Header info under tabs */}
+        <div className="bg-[#0b0f1a] border-b border-zinc-800/60">
+          <div className="max-w-7xl mx-auto px-5 py-4">
+            <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">
+              Quantum-Inspired Portfolio Optimization with QAOA
+            </h1>
+            <p className="text-zinc-400 text-sm">
+              Dataset: <span className="text-zinc-200">{datasetLabel}</span>
+              {" • "}Risk: <span className="text-zinc-200">{riskPretty}</span>
+              {" • "}Rebalance: <span className="text-zinc-200">{rebalanceFreq}</span>
+              {" • "}Hybrid: <span className="text-zinc-200">{useHybrid ? "On" : "Off"}</span>
+              {" • "}Init: <span className="text-zinc-200">{`₹${initialEquity.toLocaleString("en-IN")}`}</span>
+              {" • "}Horizon: <span className="text-zinc-200">{timeHorizon} days</span>
+              {" • "}Thresh: <span className="text-zinc-200">{threshold}%</span>
+            </p>
           </div>
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-auto">
           <div className="max-w-7xl mx-auto px-5 py-6 md:py-8 space-y-6">
+            {/* Nothing selected state */}
+            {activeTab === null && (
+              <EmptyState
+                title="Pick a section from the tabs"
+                subtitle="Use the row above to view Quantum vs Classical, Evolution, Insights, Stress, or Explain."
+              />
+            )}
+
             {/* COMPARE TAB */}
             {activeTab === "compare" && (
               <>
@@ -614,64 +641,6 @@ export default function Dashboard() {
               </div>
             )}
 
-            {/* CONSTRAINTS TAB */}
-            {activeTab === "constraints" && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card title="Sector Caps (%)">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    {Object.keys(sectorCaps).map((k) => (
-                      <div key={k}>
-                        <label className="block text-zinc-300 mb-1">{k}</label>
-                        <input
-                          type="number"
-                          className="w-full bg-[#0b0f1a] border border-zinc-700 rounded-lg px-3 py-2"
-                          value={sectorCaps[k]}
-                          min={0}
-                          max={100}
-                          onChange={(e) => setSectorCaps({ ...sectorCaps, [k]: Number(e.target.value) })}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </Card>
-
-                <Card title="ESG & Turnover">
-                  <div className="space-y-4 text-sm">
-                    <label className="inline-flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="accent-indigo-500 w-4 h-4"
-                        checked={esgExclude}
-                        onChange={(e) => setEsgExclude(e.target.checked)}
-                      />
-                      <span>Exclude non-ESG (e.g., oil/coal)</span>
-                    </label>
-
-                    <div>
-                      <label className="block text-zinc-300 mb-1">Turnover Cap (%)</label>
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={turnoverCap}
-                        onChange={(e) => setTurnoverCap(Number(e.target.value))}
-                        className="w-full accent-indigo-500"
-                      />
-                      <div className="text-zinc-400 mt-1">{turnoverCap}% max rebalance turnover</div>
-                    </div>
-
-                    <button
-                      onClick={handleApplyConstraints}
-                      className="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60"
-                      disabled={loading.qaoa || loading.alloc || loading.frontier}
-                    >
-                      {(loading.qaoa || loading.alloc || loading.frontier) ? "Applying..." : "Apply Constraints"}
-                    </button>
-                  </div>
-                </Card>
-              </div>
-            )}
-
             {/* EXPLAIN TAB */}
             {activeTab === "explain" && (
               <Card title="Top Measured Portfolios (Demo)">
@@ -707,7 +676,7 @@ export default function Dashboard() {
             )}
 
             {/* Footer / Exports */}
-            {showStress && (
+            {showStress && activeTab !== null && (
               <div className="pt-2 pb-8 flex flex-wrap gap-2">
                 <button
                   className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 transition"
