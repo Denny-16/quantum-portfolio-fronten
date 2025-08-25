@@ -5,12 +5,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { addToast, setTimeHorizon, setThreshold, setInitialEquity } from "../store/uiSlice";
 import EmptyState from "./EmptyState.js";
 import Skeleton from "./Skeleton.js";
-import { downloadJSON, downloadCSV } from "../utils/exporters.js";
+import { downloadJSON, downloadCSV } from "../utils/exporters.js"; // (ok if unused)
 import InsightsPanel from "./InsightsPanel.js";
 
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, BarChart, Bar, CartesianGrid, Label,
+  ReferenceLine, // <-- needed for the dashed threshold line
 } from "recharts";
 
 import {
@@ -22,7 +23,7 @@ import {
   stressSim,
 } from "../lib/mockApi.js";
 
-// ---------- Small UI helpers ----------
+// ---------- UI bits ----------
 const Card = ({ title, children, className = "" }) => (
   <div className={`bg-[#0f1422] border border-zinc-800/70 rounded-2xl p-4 shadow-sm ${className}`}>
     {title ? (
@@ -63,43 +64,43 @@ export default function Dashboard() {
     activeTab,
   } = useSelector((s) => s.ui);
 
-  // SAFE risk label
+  // Safe risk label
   const safeRiskLevel = (typeof riskLevel === "string" && riskLevel.length) ? riskLevel : "medium";
   const riskPretty = safeRiskLevel.charAt(0).toUpperCase() + safeRiskLevel.slice(1);
 
   const [activeSlice, setActiveSlice] = useState(null);
 
-  // Local constraint controls (shown on Home only)
+  // Home constraints
   const [sectorCaps, setSectorCaps] = useState({ Tech: 40, Finance: 35, Healthcare: 35, Energy: 25 });
   const [turnoverCap, setTurnoverCap] = useState(20);
   const [esgExclude, setEsgExclude] = useState(true);
   const [useHybrid, setUseHybrid] = useState(true);
 
-  // Section-specific controls
-  const [rebalanceFreq, setRebalanceFreq] = useState("Monthly"); // shown in compare & evolution only
-  // Stress controls
+  // Section controls
+  const [rebalanceFreq, setRebalanceFreq] = useState("Monthly"); // compare & evolution
   const [stress, setStress] = useState({ ratesBps: 200, oilPct: 15, techPct: -8, fxPct: 3 });
 
-  // Data state
+  // Data
   const [frontier, setFrontier] = useState([]);
   const [sharpeData, setSharpeData] = useState([]);
   const [alloc, setAlloc] = useState([]);
   const [evolution, setEvolution] = useState([]);
   const [topBits, setTopBits] = useState([]);
-  const [stressed, setStressed] = useState([]);
+  const [stressed, setStressed] = useState({ bars: [], ruinLine: 0 });
 
   // Loading flags
   const [loading, setLoading] = useState({
     frontier: false, sharpe: false, qaoa: false, alloc: false, evo: false, stress: false
   });
 
-  // Build constraints object for API
+  // Constraints object
   const constraints = useMemo(
     () => ({ sectorCaps, turnoverCap, esgExclude }),
     [sectorCaps, turnoverCap, esgExclude]
   );
 
   // ---------- Effects ----------
+  // Initial load
   useEffect(() => {
     (async () => {
       try {
@@ -133,7 +134,7 @@ export default function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Frontier depends on risk/constraints/threshold
+  // Frontier updates
   useEffect(() => {
     (async () => {
       try {
@@ -150,7 +151,7 @@ export default function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [safeRiskLevel, threshold, constraints]);
 
-  // Evolution depends on time/rebalance/hybrid/equity
+  // Evolution updates
   useEffect(() => {
     (async () => {
       try {
@@ -167,7 +168,7 @@ export default function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rebalanceFreq, useHybrid, initialEquity, timeHorizon]);
 
-  // Threshold auto-applies QAOA + alloc + frontier
+  // Threshold → re-run QAOA + allocation + frontier
   useEffect(() => {
     (async () => {
       try {
@@ -177,6 +178,7 @@ export default function Dashboard() {
           fetchEfficientFrontier({ riskLevel: safeRiskLevel, constraints, threshold }),
         ]);
         setTopBits(bits);
+
         const newAlloc = await fetchAllocation({
           topBits: bits[0]?.bits || "10101",
           hybrid: useHybrid,
@@ -195,14 +197,30 @@ export default function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [threshold, useHybrid, constraints, safeRiskLevel]);
 
-  // Stress sim depends on last evolution point and stress sliders
+  // Stress chart: recompute when shocks / threshold / equity / alloc change
   useEffect(() => {
     (async () => {
       try {
         setLoading((l) => ({ ...l, stress: true }));
-        const last = evolution[evolution.length - 1] || { Quantum: 121900, Classical: 112100 };
-        const res = await stressSim({ lastQuantum: last.Quantum, lastClassical: last.Classical, stress });
-        setStressed(res);
+        const res = await stressSim({
+          alloc,          // [{name, value}, ...] from the pie
+          initialEquity,  // rupees
+          threshold,      // percentage
+          stress,         // sliders
+        });
+
+        // Backward-compatible adapter:
+        // If mock returns an array (old shape), convert it to {bars, ruinLine}
+        if (Array.isArray(res)) {
+          setStressed({ bars: res, ruinLine: (Number(threshold) / 100) * Number(initialEquity || 0) });
+        } else {
+          setStressed({
+            bars: Array.isArray(res?.bars) ? res.bars : [],
+            ruinLine: typeof res?.ruinLine === "number"
+              ? res.ruinLine
+              : (Number(threshold) / 100) * Number(initialEquity || 0),
+          });
+        }
       } catch (e) {
         console.error(e);
         dispatch(addToast({ type: "error", msg: "Failed to run stress simulation." }));
@@ -211,8 +229,9 @@ export default function Dashboard() {
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stress, evolution]);
+  }, [stress, threshold, initialEquity, alloc]);
 
+  // Apply constraints -> QAOA + alloc + frontier
   async function handleApplyConstraints() {
     try {
       setLoading((l) => ({ ...l, qaoa: true, alloc: true, frontier: true }));
@@ -252,10 +271,9 @@ export default function Dashboard() {
   const showStress = !options?.length || options.includes("Stress Testing");
   const showClassical = !options?.length || options.includes("Classical Comparison");
 
-  // ---------- Home (no cards; constraints + two-pane results) ----------
+  // ---------- Home (constraints + two-pane results) ----------
   const renderHome = () => (
     <div className="max-w-7xl mx-auto px-5 py-6 md:py-8 space-y-6">
-      {/* Constraints panel on Home */}
       <Card title="Constraints">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Sector caps */}
@@ -278,7 +296,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Toggles + Turnover */}
+          {/* ESG + Turnover + Hybrid */}
           <div className="lg:col-span-1 space-y-4 text-sm">
             <label className="inline-flex items-center gap-2 cursor-pointer">
               <input
@@ -314,7 +332,7 @@ export default function Dashboard() {
             </label>
           </div>
 
-          {/* Initial equity + apply */}
+          {/* Initial equity + Apply */}
           <div className="lg:col-span-1 space-y-4">
             <div>
               <label className="block text-zinc-300 mb-1">Initial Equity (₹)</label>
@@ -339,9 +357,8 @@ export default function Dashboard() {
         </div>
       </Card>
 
-      {/* Two-pane results under constraints: left list, right pie */}
+      {/* Two-pane results */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Chosen companies list (from current alloc) */}
         <Card title="Chosen Companies (by Constraints)">
           {!alloc?.length ? (
             <EmptyState title="No allocation yet" subtitle="Apply constraints to generate weights." />
@@ -367,7 +384,6 @@ export default function Dashboard() {
           )}
         </Card>
 
-        {/* Allocation pie (same data) */}
         <Card title="Allocation (Pie)">
           <div className="h-[280px]">
             {!alloc?.length ? (
@@ -423,7 +439,6 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* Small tip + current setup */}
       <Card>
         <div className="text-sm text-zinc-300 leading-relaxed">
           <p className="mb-2">
@@ -510,12 +525,15 @@ export default function Dashboard() {
                     </Card>
                     <Card title="Actions">
                       <button
-                        onClick={handleApplyConstraints}
-                        className="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-sm disabled:opacity-60"
-                        disabled={loading.qaoa || loading.alloc || loading.frontier}
-                      >
-                        {(loading.qaoa || loading.alloc || loading.frontier) ? "Applying..." : "Apply Constraints"}
-                      </button>
+  onClick={handleApplyConstraints}
+  className="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-sm disabled:opacity-60"
+  disabled={loading.qaoa || loading.alloc || loading.frontier}
+>
+  {(loading.qaoa || loading.alloc || loading.frontier)
+    ? "Applying..."
+    : "Apply Constraints"}
+</button>
+
                     </Card>
                   </div>
 
@@ -635,14 +653,14 @@ export default function Dashboard() {
                       </div>
                     </Card>
 
-                    {/* NOTE: Portfolio Evolution chart intentionally REMOVED from Compare */}
+                    {/* (Intentionally no evolution chart here) */}
                   </div>
                 </>
               )}
 
               {activeTab === "evolution" && (
                 <>
-                  {/* Time control here too */}
+                  {/* Time + Rebalance + Hybrid */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <Card title="Time (days)">
                       <input
@@ -754,7 +772,7 @@ export default function Dashboard() {
                           onChange={(e) => setStress({ ...stress, techPct: Number(e.target.value) })}
                           className="w-full accent-indigo-500"
                         />
-                        <div className="text-zinc-400 mt-1">{stress.techPct}%</div>
+                                                <div className="text-zinc-400 mt-1">{stress.techPct}%</div>
                       </div>
                       <div>
                         <label className="block text-zinc-300 mb-1">FX Shock (±%)</label>
@@ -781,31 +799,57 @@ export default function Dashboard() {
                     </div>
                   </Card>
 
-                  <Card title="Stress Result (Simulated NAV)">
-                    <div className="h-[280px]">
+                  <Card title="Stock Resilience vs Ruin Threshold">
+                    <div className="h-[320px]">
                       {loading.stress ? (
                         <Skeleton className="h-full w-full" />
-                      ) : !stressed?.length ? (
-                        <EmptyState title="No stress result yet" subtitle="Move the sliders to simulate shocks." />
+                      ) : !stressed?.bars?.length ? (
+                        <EmptyState title="No stress result yet" subtitle="Adjust shocks or threshold." />
                       ) : (
                         <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={stressed} margin={{ top: 10, right: 12, left: 24, bottom: 8 }}>
+                          <BarChart data={stressed.bars} margin={{ top: 10, right: 12, left: 24, bottom: 8 }}>
                             <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.15} />
-                            <XAxis dataKey="name" stroke="#a1a1aa" tickMargin={6} />
+                            <XAxis
+                              dataKey="name"
+                              stroke="#a1a1aa"
+                              tickMargin={6}
+                              interval={0}
+                              angle={-15}
+                              textAnchor="end"
+                              height={60}
+                            />
                             <YAxis stroke="#a1a1aa" tickFormatter={(v) => currency(v)} tickMargin={6} width={88} />
                             <Tooltip
                               formatter={(v) => currency(v)}
-                              contentStyle={tooltipStyles.contentStyle}
-                              labelStyle={tooltipStyles.labelStyle}
-                              itemStyle={tooltipStyles.itemStyle}
-                              wrapperStyle={tooltipStyles.wrapperStyle}
+                              contentStyle={{
+                                background: "#111827",
+                                border: "1px solid #6366F1",
+                                borderRadius: 8,
+                                boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+                              }}
+                              labelStyle={{ color: "#C7D2FE", fontSize: 12 }}
+                              itemStyle={{ color: "#E5E7EB", fontSize: 12 }}
+                              wrapperStyle={{ zIndex: 50 }}
                             />
-                            <Bar dataKey="value" fill="#F59E0B" radius={[8, 8, 0, 0]} />
+                            {/* Green dashed ruin threshold line */}
+                            <ReferenceLine
+                              y={stressed.ruinLine}
+                              stroke="#22c55e"
+                              strokeDasharray="6 6"
+                              ifOverflow="extendDomain"
+                              label={{
+                                value: `Ruin Threshold (${threshold}%)`,
+                                position: "insideTopRight",
+                                fill: "#22c55e",
+                                fontSize: 12,
+                              }}
+                            />
+                            <Bar dataKey="value" fill="#ef4444" opacity={0.85} radius={[8, 8, 0, 0]} />
                           </BarChart>
                         </ResponsiveContainer>
                       )}
                     </div>
-                    <ChartCaption x="Model" y="NAV (₹)" />
+                    <ChartCaption x="Stocks" y="Equity after worst-case days (₹)" />
                   </Card>
                 </div>
               )}
