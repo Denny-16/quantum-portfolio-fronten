@@ -366,19 +366,22 @@ export default function Dashboard() {
             <div className="overflow-auto">
               <table className="w-full text-sm">
                 <thead className="bg-[#0f1422] text-zinc-300">
-                  <tr>
-                    <th className="text-left p-3">Company</th>
-                    <th className="text-right p-3">Weight</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {alloc.map((row, i) => (
-                    <tr key={i} className="border-t border-zinc-800/50">
-                      <td className="p-3">{row.name}</td>
-                      <td className="p-3 text-right">{percent(row.value, 0)}</td>
-                    </tr>
-                  ))}
-                </tbody>
+  <tr>
+    <th className="text-left p-3">Company</th>
+    <th className="text-right p-3">Weight</th>
+    <th className="text-right p-3">Allocation (₹)</th>
+  </tr>
+</thead>
+<tbody>
+  {alloc.map((row, i) => (
+    <tr key={i} className="border-t border-zinc-800/50">
+      <td className="p-3">{row.name}</td>
+      <td className="p-3 text-right">{percent(row.value, 0)}</td>
+      <td className="p-3 text-right">{currency(initialEquity * (row.value / 100))}</td>
+    </tr>
+  ))}
+</tbody>
+
               </table>
             </div>
           )}
